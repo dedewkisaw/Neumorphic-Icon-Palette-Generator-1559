@@ -20,7 +20,13 @@ const {
   FiTrendingUp
 } = FiIcons;
 
-const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onIconsGenerated, onEditIcon }) => {
+const AIIconGenerator = ({ 
+  projectDescription, 
+  uploadedImage, 
+  selectedStyle, 
+  onIconsGenerated, 
+  onEditIcon 
+}) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedIcons, setGeneratedIcons] = useState([]);
   const [analysisResults, setAnalysisResults] = useState(null);
@@ -30,170 +36,231 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [imageAnalysisData, setImageAnalysisData] = useState(null);
 
-  // ENHANCED: Comprehensive keyword-to-icon mapping system
+  // COMPLETELY REWRITTEN: Advanced keyword-to-icon mapping system
   const getContextualIcons = (description, category, seed) => {
     const descLower = description.toLowerCase();
-    
-    // Advanced keyword mapping with semantic understanding
+    console.log('🔍 Analyzing description:', descLower);
+
+    // ENHANCED: Comprehensive semantic analysis with multiple keyword detection
     const semanticIconMappings = {
-      // Business & Finance
-      business: ['Briefcase', 'TrendingUp', 'Target', 'Award', 'Users', 'Building'],
-      finance: ['DollarSign', 'TrendingUp', 'PieChart', 'BarChart', 'CreditCard', 'Briefcase'],
-      banking: ['Building', 'Shield', 'Lock', 'CreditCard', 'DollarSign', 'Archive'],
-      investment: ['TrendingUp', 'BarChart', 'PieChart', 'Target', 'Award', 'Activity'],
-      accounting: ['Calculator', 'FileText', 'BarChart', 'DollarSign', 'Archive', 'Folder'],
+      // Business & Corporate
+      business: {
+        primary: ['Briefcase', 'TrendingUp', 'Target', 'Award', 'Users', 'Building'],
+        keywords: ['business', 'company', 'corporate', 'office', 'professional', 'enterprise']
+      },
+      finance: {
+        primary: ['DollarSign', 'TrendingUp', 'PieChart', 'BarChart', 'CreditCard', 'Calculator'],
+        keywords: ['finance', 'money', 'bank', 'payment', 'investment', 'accounting', 'budget']
+      },
+      ecommerce: {
+        primary: ['ShoppingCart', 'Package', 'Truck', 'CreditCard', 'Tag', 'Gift'],
+        keywords: ['shop', 'store', 'ecommerce', 'retail', 'buy', 'sell', 'marketplace', 'cart']
+      },
       
-      // Technology & Software
-      tech: ['Cpu', 'Code', 'Database', 'Cloud', 'Smartphone', 'Monitor'],
-      technology: ['Monitor', 'Smartphone', 'Cpu', 'Database', 'Wifi', 'Cloud'],
-      software: ['Code', 'Terminal', 'Database', 'Settings', 'Tool', 'Cpu'],
-      app: ['Smartphone', 'Tablet', 'Monitor', 'Grid', 'Menu', 'Settings'],
-      web: ['Globe', 'Monitor', 'Code', 'Link', 'Wifi', 'Share'],
-      mobile: ['Smartphone', 'Tablet', 'Battery', 'Wifi', 'Bell', 'Navigation'],
-      ai: ['Brain', 'Zap', 'Cpu', 'Activity', 'TrendingUp', 'Target'],
-      data: ['Database', 'BarChart', 'PieChart', 'Activity', 'TrendingUp', 'Archive'],
-      
-      // E-commerce & Retail
-      ecommerce: ['ShoppingCart', 'Package', 'Truck', 'CreditCard', 'Tag', 'Gift'],
-      shopping: ['ShoppingCart', 'Bag', 'Tag', 'Gift', 'Heart', 'Star'],
-      retail: ['Store', 'ShoppingCart', 'Package', 'Tag', 'CreditCard', 'Users'],
-      marketplace: ['Users', 'ShoppingCart', 'Star', 'MessageCircle', 'Award', 'Shield'],
+      // Technology
+      tech: {
+        primary: ['Smartphone', 'Monitor', 'Cpu', 'Database', 'Wifi', 'Cloud'],
+        keywords: ['tech', 'technology', 'software', 'digital', 'computer', 'system']
+      },
+      app: {
+        primary: ['Smartphone', 'Tablet', 'Monitor', 'Grid', 'Menu', 'Settings'],
+        keywords: ['app', 'application', 'mobile', 'interface', 'ui', 'ux']
+      },
+      web: {
+        primary: ['Globe', 'Monitor', 'Code', 'Link', 'Wifi', 'Share'],
+        keywords: ['web', 'website', 'online', 'internet', 'browser', 'portal']
+      },
+      ai: {
+        primary: ['Brain', 'Zap', 'Cpu', 'Activity', 'TrendingUp', 'Target'],
+        keywords: ['ai', 'artificial', 'intelligence', 'machine', 'learning', 'smart', 'auto']
+      },
       
       // Health & Medical
-      health: ['Heart', 'Activity', 'Shield', 'Plus', 'Sun', 'Zap'],
-      medical: ['Plus', 'Heart', 'Activity', 'Shield', 'Eye', 'Pill'],
-      healthcare: ['Heart', 'Plus', 'Shield', 'Users', 'Calendar', 'Bell'],
-      fitness: ['Activity', 'Heart', 'Target', 'TrendingUp', 'Award', 'Zap'],
-      wellness: ['Heart', 'Sun', 'Leaf', 'Shield', 'Smile', 'Activity'],
+      health: {
+        primary: ['Heart', 'Activity', 'Shield', 'Plus', 'Sun', 'Zap'],
+        keywords: ['health', 'medical', 'wellness', 'fitness', 'doctor', 'hospital']
+      },
+      fitness: {
+        primary: ['Activity', 'Heart', 'Target', 'TrendingUp', 'Award', 'Zap'],
+        keywords: ['fitness', 'gym', 'workout', 'exercise', 'training', 'sport']
+      },
       
       // Education & Learning
-      education: ['Book', 'GraduationCap', 'Award', 'Lightbulb', 'Users', 'Target'],
-      learning: ['Book', 'Lightbulb', 'Target', 'Award', 'Brain', 'TrendingUp'],
-      school: ['Book', 'Users', 'Calendar', 'Bell', 'Award', 'GraduationCap'],
-      university: ['GraduationCap', 'Book', 'Users', 'Building', 'Award', 'Globe'],
-      course: ['Play', 'Book', 'Video', 'Headphones', 'CheckCircle', 'Award'],
+      education: {
+        primary: ['Book', 'GraduationCap', 'Award', 'Lightbulb', 'Users', 'Target'],
+        keywords: ['education', 'school', 'university', 'learning', 'teach', 'study']
+      },
+      course: {
+        primary: ['Play', 'Book', 'Video', 'Headphones', 'CheckCircle', 'Award'],
+        keywords: ['course', 'tutorial', 'lesson', 'training', 'workshop']
+      },
       
       // Travel & Tourism
-      travel: ['MapPin', 'Compass', 'Camera', 'Plane', 'Mountain', 'Globe'],
-      tourism: ['Camera', 'MapPin', 'Globe', 'Mountain', 'Sun', 'Compass'],
-      hotel: ['Building', 'MapPin', 'Star', 'Wifi', 'Phone', 'Key'],
-      flight: ['Plane', 'Globe', 'Calendar', 'Clock', 'MapPin', 'Navigation'],
+      travel: {
+        primary: ['MapPin', 'Compass', 'Camera', 'Plane', 'Mountain', 'Globe'],
+        keywords: ['travel', 'trip', 'vacation', 'tourism', 'journey', 'explore']
+      },
+      hotel: {
+        primary: ['Building', 'MapPin', 'Star', 'Wifi', 'Phone', 'Key'],
+        keywords: ['hotel', 'accommodation', 'booking', 'room', 'stay']
+      },
       
       // Food & Restaurant
-      food: ['Coffee', 'Utensils', 'Star', 'Clock', 'Heart', 'MapPin'],
-      restaurant: ['Utensils', 'Coffee', 'Star', 'Clock', 'MapPin', 'Users'],
-      delivery: ['Truck', 'Package', 'Clock', 'MapPin', 'Phone', 'Navigation'],
-      recipe: ['Book', 'Clock', 'Heart', 'Star', 'Coffee', 'Utensils'],
+      food: {
+        primary: ['Coffee', 'Utensils', 'Star', 'Clock', 'Heart', 'MapPin'],
+        keywords: ['food', 'restaurant', 'cafe', 'dining', 'recipe', 'cooking']
+      },
+      delivery: {
+        primary: ['Truck', 'Package', 'Clock', 'MapPin', 'Phone', 'Navigation'],
+        keywords: ['delivery', 'order', 'takeout', 'shipping', 'courier']
+      },
       
       // Entertainment & Media
-      entertainment: ['Play', 'Music', 'Video', 'Camera', 'Headphones', 'Star'],
-      media: ['Video', 'Camera', 'Mic', 'Headphones', 'Play', 'Share'],
-      gaming: ['Target', 'Trophy', 'Zap', 'Star', 'Award', 'Shield'],
-      music: ['Music', 'Headphones', 'Play', 'Heart', 'Star', 'Volume'],
-      video: ['Video', 'Play', 'Camera', 'Monitor', 'Share', 'Download'],
+      gaming: {
+        primary: ['Target', 'Trophy', 'Zap', 'Star', 'Award', 'Shield'],
+        keywords: ['game', 'gaming', 'play', 'player', 'arcade', 'console']
+      },
+      music: {
+        primary: ['Music', 'Headphones', 'Play', 'Heart', 'Star', 'Volume'],
+        keywords: ['music', 'audio', 'sound', 'song', 'playlist', 'podcast']
+      },
+      video: {
+        primary: ['Video', 'Play', 'Camera', 'Monitor', 'Share', 'Download'],
+        keywords: ['video', 'movie', 'stream', 'watch', 'film', 'cinema']
+      },
       
       // Social & Communication
-      social: ['Users', 'MessageCircle', 'Share', 'Heart', 'ThumbsUp', 'Camera'],
-      communication: ['MessageCircle', 'Phone', 'Mail', 'Send', 'Users', 'Globe'],
-      chat: ['MessageCircle', 'Send', 'Users', 'Smile', 'Phone', 'Bell'],
-      messaging: ['Send', 'MessageCircle', 'Mail', 'Bell', 'Users', 'Phone'],
+      social: {
+        primary: ['Users', 'MessageCircle', 'Share', 'Heart', 'ThumbsUp', 'Camera'],
+        keywords: ['social', 'community', 'network', 'friends', 'connect']
+      },
+      chat: {
+        primary: ['MessageCircle', 'Send', 'Users', 'Smile', 'Phone', 'Bell'],
+        keywords: ['chat', 'message', 'messenger', 'talk', 'conversation']
+      },
       
       // Real Estate & Property
-      'real estate': ['Home', 'Building', 'MapPin', 'Key', 'Search', 'Star'],
-      realestate: ['Home', 'Building', 'MapPin', 'Key', 'Search', 'Star'],
-      property: ['Home', 'Building', 'Key', 'MapPin', 'DollarSign', 'Search'],
-      
-      // Sports & Fitness
-      sports: ['Trophy', 'Target', 'Activity', 'Award', 'Zap', 'Star'],
-      gym: ['Activity', 'Target', 'TrendingUp', 'Heart', 'Award', 'Zap'],
-      
-      // Fashion & Beauty
-      fashion: ['Star', 'Heart', 'Camera', 'Edit', 'Eye', 'Bag'],
-      beauty: ['Star', 'Heart', 'Sun', 'Eye', 'Camera', 'Smile'],
-      
-      // News & Media
-      news: ['FileText', 'Globe', 'TrendingUp', 'Bell', 'Share', 'Eye'],
-      blog: ['Edit', 'FileText', 'Share', 'Heart', 'MessageCircle', 'Eye'],
+      realestate: {
+        primary: ['Home', 'Building', 'MapPin', 'Key', 'Search', 'Star'],
+        keywords: ['real estate', 'property', 'house', 'home', 'rent', 'buy']
+      },
       
       // Transportation
-      transport: ['Truck', 'Navigation', 'MapPin', 'Clock', 'Route', 'Fuel'],
-      logistics: ['Package', 'Truck', 'MapPin', 'Clock', 'BarChart', 'Route'],
+      transport: {
+        primary: ['Truck', 'Navigation', 'MapPin', 'Clock', 'Route', 'Fuel'],
+        keywords: ['transport', 'car', 'vehicle', 'ride', 'taxi', 'uber']
+      },
       
       // Security & Safety
-      security: ['Shield', 'Lock', 'Eye', 'Key', 'Bell', 'AlertTriangle'],
-      safety: ['Shield', 'AlertTriangle', 'Eye', 'Bell', 'Heart', 'Plus'],
+      security: {
+        primary: ['Shield', 'Lock', 'Eye', 'Key', 'Bell', 'AlertTriangle'],
+        keywords: ['security', 'safe', 'protect', 'guard', 'privacy', 'secure']
+      },
+      
+      // News & Media
+      news: {
+        primary: ['FileText', 'Globe', 'TrendingUp', 'Bell', 'Share', 'Eye'],
+        keywords: ['news', 'media', 'article', 'blog', 'journal', 'press']
+      }
     };
 
-    // Multi-level keyword matching
-    let selectedIcons = [];
-    
-    // 1. Direct category match
-    if (semanticIconMappings[category]) {
-      selectedIcons = [...semanticIconMappings[category]];
-    }
-    
-    // 2. Keyword-based semantic matching
-    if (selectedIcons.length === 0) {
-      for (const [key, icons] of Object.entries(semanticIconMappings)) {
-        if (descLower.includes(key) || key.includes(descLower.split(' ')[0])) {
-          selectedIcons = [...icons];
-          break;
-        }
-      }
-    }
-    
-    // 3. Context-aware matching for compound descriptions
-    if (selectedIcons.length === 0) {
-      const words = descLower.split(/\s+/);
-      const contextMatches = [];
+    // ENHANCED: Multi-level semantic matching with scoring
+    let bestMatches = [];
+    let maxScore = 0;
+
+    // 1. Exact category match with high score
+    Object.entries(semanticIconMappings).forEach(([category, data]) => {
+      let score = 0;
       
-      words.forEach(word => {
-        for (const [key, icons] of Object.entries(semanticIconMappings)) {
-          if (key.includes(word) || word.includes(key)) {
-            contextMatches.push(...icons);
-          }
+      // Check for exact category mentions
+      if (descLower.includes(category)) {
+        score += 100;
+      }
+      
+      // Check for keyword matches
+      data.keywords.forEach(keyword => {
+        if (descLower.includes(keyword)) {
+          score += 50;
+        }
+        
+        // Partial matches for compound words
+        if (keyword.length > 4 && descLower.includes(keyword.slice(0, -1))) {
+          score += 25;
         }
       });
       
-      if (contextMatches.length > 0) {
-        // Remove duplicates and take first 6
-        selectedIcons = [...new Set(contextMatches)].slice(0, 6);
+      // Context-aware matching for related terms
+      if (category === 'fitness' && (descLower.includes('health') || descLower.includes('track'))) {
+        score += 30;
       }
-    }
-    
-    // 4. Fallback with smart defaults based on common app types
-    if (selectedIcons.length === 0) {
-      if (descLower.includes('dashboard') || descLower.includes('admin')) {
-        selectedIcons = ['BarChart', 'Users', 'Settings', 'Activity', 'Bell', 'Grid'];
-      } else if (descLower.includes('portfolio') || descLower.includes('personal')) {
-        selectedIcons = ['User', 'Briefcase', 'Star', 'Eye', 'Mail', 'Share'];
-      } else if (descLower.includes('startup') || descLower.includes('company')) {
-        selectedIcons = ['Zap', 'TrendingUp', 'Target', 'Users', 'Award', 'Rocket'];
-      } else if (descLower.includes('creative') || descLower.includes('design')) {
-        selectedIcons = ['Palette', 'Camera', 'Edit', 'Star', 'Eye', 'Heart'];
+      if (category === 'ecommerce' && (descLower.includes('buy') || descLower.includes('sell'))) {
+        score += 30;
+      }
+      if (category === 'app' && (descLower.includes('mobile') || descLower.includes('phone'))) {
+        score += 30;
+      }
+      
+      if (score > maxScore) {
+        maxScore = score;
+        bestMatches = data.primary;
+      }
+    });
+
+    console.log('🎯 Best match score:', maxScore, 'Icons:', bestMatches);
+
+    // 2. Fallback with smart context analysis
+    if (maxScore < 25) {
+      console.log('🔄 Using fallback analysis...');
+      
+      // Analyze description for action words
+      if (descLower.includes('track') || descLower.includes('monitor')) {
+        bestMatches = ['Activity', 'BarChart', 'TrendingUp', 'Target', 'Eye', 'Bell'];
+      } else if (descLower.includes('manage') || descLower.includes('organize')) {
+        bestMatches = ['Folder', 'Grid', 'Settings', 'CheckCircle', 'Calendar', 'Archive'];
+      } else if (descLower.includes('create') || descLower.includes('build')) {
+        bestMatches = ['Plus', 'Edit', 'Tool', 'Lightbulb', 'Zap', 'Target'];
+      } else if (descLower.includes('share') || descLower.includes('connect')) {
+        bestMatches = ['Share', 'Users', 'Link', 'Globe', 'Send', 'MessageCircle'];
+      } else if (descLower.includes('search') || descLower.includes('find')) {
+        bestMatches = ['Search', 'Eye', 'MapPin', 'Filter', 'Compass', 'Target'];
       } else {
-        // Ultimate fallback - versatile interface icons
-        selectedIcons = ['Home', 'Search', 'User', 'Settings', 'Bell', 'Mail'];
+        // Ultimate fallback based on common app patterns
+        if (descLower.length > 20) {
+          bestMatches = ['Home', 'User', 'Settings', 'Bell', 'Search', 'Menu'];
+        } else {
+          bestMatches = ['Circle', 'Square', 'Triangle', 'Star', 'Plus', 'Minus'];
+        }
       }
     }
-    
-    // Ensure exactly 6 icons
-    return selectedIcons.slice(0, 6);
+
+    // 3. Ensure exactly 6 unique icons
+    const uniqueIcons = [...new Set(bestMatches)];
+    if (uniqueIcons.length < 6) {
+      const additionalIcons = ['Settings', 'User', 'Bell', 'Mail', 'Calendar', 'Archive'];
+      additionalIcons.forEach(icon => {
+        if (uniqueIcons.length < 6 && !uniqueIcons.includes(icon)) {
+          uniqueIcons.push(icon);
+        }
+      });
+    }
+
+    console.log('✅ Final icons selected:', uniqueIcons.slice(0, 6));
+    return uniqueIcons.slice(0, 6);
   };
 
-  // Advanced image analysis simulation
+  // Enhanced image analysis simulation
   const analyzeUploadedImage = async (imageFile) => {
     console.log('🔍 Analyzing uploaded image:', imageFile.name);
     return new Promise((resolve) => {
       const img = new Image();
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
+
       img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
-        
+
         try {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const analysis = performAdvancedImageAnalysis(imageFile, imageData);
@@ -203,12 +270,12 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           resolve(performFilenameAnalysis(imageFile));
         }
       };
-      
+
       img.onerror = () => {
         console.log('Image load failed, using filename analysis');
         resolve(performFilenameAnalysis(imageFile));
       };
-      
+
       img.src = URL.createObjectURL(imageFile);
     });
   };
@@ -219,12 +286,12 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     const brightnessAnalysis = analyzeBrightnessContrast(data);
     const complexityAnalysis = analyzeImageComplexity(width, height, data);
     const detectedStyle = determineStyleFromImage(colorAnalysis, brightnessAnalysis, complexityAnalysis);
-    
+
     // Generate sophisticated 16-color palette
     const dominantColors = generateProfessional16ColorPalette(colorAnalysis, imageFile.name);
     const brandPersonality = determineBrandPersonality(colorAnalysis, brightnessAnalysis, imageFile.name);
     const suggestedCategories = suggestCategoriesFromVisuals(colorAnalysis, complexityAnalysis, imageFile.name);
-    
+
     return {
       dominantColors,
       detectedStyle,
@@ -247,7 +314,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
   const analyzeColorDistribution = (data) => {
     const colorCounts = {};
     const colors = [];
-    
+
     for (let i = 0; i < data.length; i += 40) {
       const r = data[i];
       const g = data[i + 1];
@@ -490,7 +557,6 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
     const defaultCategories = ['interface', 'navigation', 'action', 'communication', 'data', 'content'];
     const finalCategories = [...new Set([...categories, ...defaultCategories])].slice(0, 6);
-
     return finalCategories;
   };
 
@@ -557,6 +623,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       const contextualIcons = generateContextualIcons(description, analysis, style);
       setGeneratedIcons(contextualIcons);
       onIconsGenerated?.(contextualIcons);
+
     } catch (error) {
       console.error('AI generation failed:', error);
     } finally {
@@ -580,7 +647,6 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
     // Get contextual icons based on description and category
     selectedIcons = getContextualIcons(description, detectedCategory, Date.now());
-    
     console.log('🎨 Generated contextual icons:', selectedIcons);
 
     // Ensure exactly 6 icons for community page layout
@@ -646,15 +712,15 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
   const regenerateIcon = async (iconId) => {
     setRegeneratingIndex(iconId);
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setGeneratedIcons(prev => prev.map(icon => 
-      icon.id === iconId 
+
+    setGeneratedIcons(prev => prev.map(icon =>
+      icon.id === iconId
         ? {
-            ...icon,
-            color: analysisResults?.dominantColors?.[Math.floor(Math.random() * (analysisResults.dominantColors?.length || 16))] || `#${Math.floor(Math.random()*16777215).toString(16)}`,
-            aiConfidence: Math.random() * 0.3 + 0.7,
-            timestamp: Date.now()
-          }
+          ...icon,
+          color: analysisResults?.dominantColors?.[Math.floor(Math.random() * (analysisResults.dominantColors?.length || 16))] || `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+          aiConfidence: Math.random() * 0.3 + 0.7,
+          timestamp: Date.now()
+        }
         : icon
     ));
     setRegeneratingIndex(null);
@@ -719,7 +785,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     if ((projectDescription || uploadedImage) && !isGenerating) {
       const triggerGeneration = async () => {
         let analysis = null;
-        
+
         if (uploadedImage) {
           console.log('🖼️ Professional image analysis starting...');
           analysis = await analyzeUploadedImage(uploadedImage);
@@ -729,20 +795,20 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           analysis = generateTextBasedAnalysis(projectDescription);
           setAnalysisResults(analysis);
         }
-        
+
         generateAIIcons(projectDescription, analysis, selectedStyle);
       };
-      
+
       triggerGeneration();
     }
   }, [projectDescription, uploadedImage, selectedStyle]);
 
   const generateTextBasedAnalysis = (description) => {
     const descLower = description.toLowerCase();
-    
+
     // Generate 16-color palette based on description
     const dominantColors = generateProfessional16ColorPalette({ dominantColors: [] }, descLower);
-    
+
     return {
       dominantColors,
       detectedStyle: 'flat',
@@ -756,7 +822,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
   const determineCategoriesFromText = (description) => {
     const categories = [];
-    
+
     if (description.includes('dashboard') || description.includes('analytics')) {
       categories.push('data', 'interface', 'analytics');
     } else if (description.includes('social') || description.includes('community')) {
@@ -768,11 +834,11 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     } else if (description.includes('business') || description.includes('corporate')) {
       categories.push('business', 'interface', 'corporate');
     }
-    
+
     if (categories.length === 0) {
       categories.push('interface', 'navigation', 'action');
     }
-    
+
     return categories.slice(0, 4);
   };
 
@@ -787,10 +853,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           <div>
             <h3 className="text-3xl font-bold text-warm-800 mb-2">Professional AI Icon Generator</h3>
             <p className="text-warm-600 text-lg">
-              {uploadedImage 
-                ? 'Image-based intelligent generation with 16-color palette' 
-                : 'Deep learning powered professional icon creation'
-              }
+              {uploadedImage ? 'Image-based intelligent generation with 16-color palette' : 'Deep learning powered professional icon creation'}
             </p>
             <div className="flex items-center space-x-4 mt-2">
               <div className="flex items-center space-x-2 text-sm text-warm-500">
@@ -804,7 +867,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -939,8 +1002,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                 <p className="text-warm-600 text-lg">
                   {uploadedImage 
                     ? 'Crafting professional icons based on your uploaded design...' 
-                    : 'Creating your sophisticated professional icon set...'
-                  }
+                    : 'Creating your sophisticated professional icon set...'}
                 </p>
               </div>
             </div>
@@ -977,7 +1039,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                   {selectedIcons.size} selected • Click to select • Right-click to edit • Professional 16-color system
                 </p>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setSelectedIcons(new Set(generatedIcons.map(icon => icon.id)))}
@@ -1018,13 +1080,10 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleIconSelection(icon.id)}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      handleEditIcon(icon);
-                    }}
+                    onContextMenu={(e) => { e.preventDefault(); handleEditIcon(icon); }}
                     className={`aspect-square rounded-3xl flex items-center justify-center cursor-pointer transition-all duration-300 border-2 shadow-neumorphic hover:shadow-neumorphic-lg ${
-                      selectedIcons.has(icon.id) 
-                        ? 'border-primary-400 bg-primary-50 shadow-neumorphic-inset' 
+                      selectedIcons.has(icon.id)
+                        ? 'border-primary-400 bg-primary-50 shadow-neumorphic-inset'
                         : 'border-white/60 bg-white hover:border-primary-300'
                     }`}
                     style={{ backgroundColor: selectedIcons.has(icon.id) ? `${icon.color}15` : 'white' }}
@@ -1097,8 +1156,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           </div>
           <h4 className="text-2xl font-bold text-warm-800 mb-4">Ready for Professional Generation</h4>
           <p className="text-warm-600 text-lg max-w-2xl mx-auto leading-relaxed">
-            Provide a project description or upload your design to get started with professional AI icon generation 
-            featuring our sophisticated 16-color palette system.
+            Provide a project description or upload your design to get started with professional AI icon generation featuring our sophisticated 16-color palette system.
           </p>
         </div>
       )}
