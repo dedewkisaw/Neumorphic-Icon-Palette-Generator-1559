@@ -60,7 +60,7 @@ const Hero = () => {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-warm-800 mb-8 leading-tight">
               Create Perfect
               <span className="block bg-gradient-to-r from-primary-500 via-secondary-500 to-warm-500 bg-clip-text text-transparent animate-glow-pulse">
-                AI Icon Sets
+                Icon Palettes
               </span>
               in Seconds
             </h1>

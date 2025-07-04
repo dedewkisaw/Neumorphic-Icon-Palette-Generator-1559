@@ -3,7 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 
-const { FiZap, FiRefreshCw, FiDownload, FiEdit3, FiEye, FiCopy, FiCheck, FiSettings, FiShuffle, FiPlay, FiPause, FiSkipForward, FiStar, FiTrendingUp } = FiIcons;
+const {
+  FiZap,
+  FiRefreshCw,
+  FiDownload,
+  FiEdit3,
+  FiEye,
+  FiCopy,
+  FiCheck,
+  FiSettings,
+  FiShuffle,
+  FiPlay,
+  FiPause,
+  FiSkipForward,
+  FiStar,
+  FiTrendingUp
+} = FiIcons;
 
 const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onIconsGenerated, onEditIcon }) => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -15,10 +30,160 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [imageAnalysisData, setImageAnalysisData] = useState(null);
 
+  // ENHANCED: Comprehensive keyword-to-icon mapping system
+  const getContextualIcons = (description, category, seed) => {
+    const descLower = description.toLowerCase();
+    
+    // Advanced keyword mapping with semantic understanding
+    const semanticIconMappings = {
+      // Business & Finance
+      business: ['Briefcase', 'TrendingUp', 'Target', 'Award', 'Users', 'Building'],
+      finance: ['DollarSign', 'TrendingUp', 'PieChart', 'BarChart', 'CreditCard', 'Briefcase'],
+      banking: ['Building', 'Shield', 'Lock', 'CreditCard', 'DollarSign', 'Archive'],
+      investment: ['TrendingUp', 'BarChart', 'PieChart', 'Target', 'Award', 'Activity'],
+      accounting: ['Calculator', 'FileText', 'BarChart', 'DollarSign', 'Archive', 'Folder'],
+      
+      // Technology & Software
+      tech: ['Cpu', 'Code', 'Database', 'Cloud', 'Smartphone', 'Monitor'],
+      technology: ['Monitor', 'Smartphone', 'Cpu', 'Database', 'Wifi', 'Cloud'],
+      software: ['Code', 'Terminal', 'Database', 'Settings', 'Tool', 'Cpu'],
+      app: ['Smartphone', 'Tablet', 'Monitor', 'Grid', 'Menu', 'Settings'],
+      web: ['Globe', 'Monitor', 'Code', 'Link', 'Wifi', 'Share'],
+      mobile: ['Smartphone', 'Tablet', 'Battery', 'Wifi', 'Bell', 'Navigation'],
+      ai: ['Brain', 'Zap', 'Cpu', 'Activity', 'TrendingUp', 'Target'],
+      data: ['Database', 'BarChart', 'PieChart', 'Activity', 'TrendingUp', 'Archive'],
+      
+      // E-commerce & Retail
+      ecommerce: ['ShoppingCart', 'Package', 'Truck', 'CreditCard', 'Tag', 'Gift'],
+      shopping: ['ShoppingCart', 'Bag', 'Tag', 'Gift', 'Heart', 'Star'],
+      retail: ['Store', 'ShoppingCart', 'Package', 'Tag', 'CreditCard', 'Users'],
+      marketplace: ['Users', 'ShoppingCart', 'Star', 'MessageCircle', 'Award', 'Shield'],
+      
+      // Health & Medical
+      health: ['Heart', 'Activity', 'Shield', 'Plus', 'Sun', 'Zap'],
+      medical: ['Plus', 'Heart', 'Activity', 'Shield', 'Eye', 'Pill'],
+      healthcare: ['Heart', 'Plus', 'Shield', 'Users', 'Calendar', 'Bell'],
+      fitness: ['Activity', 'Heart', 'Target', 'TrendingUp', 'Award', 'Zap'],
+      wellness: ['Heart', 'Sun', 'Leaf', 'Shield', 'Smile', 'Activity'],
+      
+      // Education & Learning
+      education: ['Book', 'GraduationCap', 'Award', 'Lightbulb', 'Users', 'Target'],
+      learning: ['Book', 'Lightbulb', 'Target', 'Award', 'Brain', 'TrendingUp'],
+      school: ['Book', 'Users', 'Calendar', 'Bell', 'Award', 'GraduationCap'],
+      university: ['GraduationCap', 'Book', 'Users', 'Building', 'Award', 'Globe'],
+      course: ['Play', 'Book', 'Video', 'Headphones', 'CheckCircle', 'Award'],
+      
+      // Travel & Tourism
+      travel: ['MapPin', 'Compass', 'Camera', 'Plane', 'Mountain', 'Globe'],
+      tourism: ['Camera', 'MapPin', 'Globe', 'Mountain', 'Sun', 'Compass'],
+      hotel: ['Building', 'MapPin', 'Star', 'Wifi', 'Phone', 'Key'],
+      flight: ['Plane', 'Globe', 'Calendar', 'Clock', 'MapPin', 'Navigation'],
+      
+      // Food & Restaurant
+      food: ['Coffee', 'Utensils', 'Star', 'Clock', 'Heart', 'MapPin'],
+      restaurant: ['Utensils', 'Coffee', 'Star', 'Clock', 'MapPin', 'Users'],
+      delivery: ['Truck', 'Package', 'Clock', 'MapPin', 'Phone', 'Navigation'],
+      recipe: ['Book', 'Clock', 'Heart', 'Star', 'Coffee', 'Utensils'],
+      
+      // Entertainment & Media
+      entertainment: ['Play', 'Music', 'Video', 'Camera', 'Headphones', 'Star'],
+      media: ['Video', 'Camera', 'Mic', 'Headphones', 'Play', 'Share'],
+      gaming: ['Target', 'Trophy', 'Zap', 'Star', 'Award', 'Shield'],
+      music: ['Music', 'Headphones', 'Play', 'Heart', 'Star', 'Volume'],
+      video: ['Video', 'Play', 'Camera', 'Monitor', 'Share', 'Download'],
+      
+      // Social & Communication
+      social: ['Users', 'MessageCircle', 'Share', 'Heart', 'ThumbsUp', 'Camera'],
+      communication: ['MessageCircle', 'Phone', 'Mail', 'Send', 'Users', 'Globe'],
+      chat: ['MessageCircle', 'Send', 'Users', 'Smile', 'Phone', 'Bell'],
+      messaging: ['Send', 'MessageCircle', 'Mail', 'Bell', 'Users', 'Phone'],
+      
+      // Real Estate & Property
+      'real estate': ['Home', 'Building', 'MapPin', 'Key', 'Search', 'Star'],
+      realestate: ['Home', 'Building', 'MapPin', 'Key', 'Search', 'Star'],
+      property: ['Home', 'Building', 'Key', 'MapPin', 'DollarSign', 'Search'],
+      
+      // Sports & Fitness
+      sports: ['Trophy', 'Target', 'Activity', 'Award', 'Zap', 'Star'],
+      gym: ['Activity', 'Target', 'TrendingUp', 'Heart', 'Award', 'Zap'],
+      
+      // Fashion & Beauty
+      fashion: ['Star', 'Heart', 'Camera', 'Edit', 'Eye', 'Bag'],
+      beauty: ['Star', 'Heart', 'Sun', 'Eye', 'Camera', 'Smile'],
+      
+      // News & Media
+      news: ['FileText', 'Globe', 'TrendingUp', 'Bell', 'Share', 'Eye'],
+      blog: ['Edit', 'FileText', 'Share', 'Heart', 'MessageCircle', 'Eye'],
+      
+      // Transportation
+      transport: ['Truck', 'Navigation', 'MapPin', 'Clock', 'Route', 'Fuel'],
+      logistics: ['Package', 'Truck', 'MapPin', 'Clock', 'BarChart', 'Route'],
+      
+      // Security & Safety
+      security: ['Shield', 'Lock', 'Eye', 'Key', 'Bell', 'AlertTriangle'],
+      safety: ['Shield', 'AlertTriangle', 'Eye', 'Bell', 'Heart', 'Plus'],
+    };
+
+    // Multi-level keyword matching
+    let selectedIcons = [];
+    
+    // 1. Direct category match
+    if (semanticIconMappings[category]) {
+      selectedIcons = [...semanticIconMappings[category]];
+    }
+    
+    // 2. Keyword-based semantic matching
+    if (selectedIcons.length === 0) {
+      for (const [key, icons] of Object.entries(semanticIconMappings)) {
+        if (descLower.includes(key) || key.includes(descLower.split(' ')[0])) {
+          selectedIcons = [...icons];
+          break;
+        }
+      }
+    }
+    
+    // 3. Context-aware matching for compound descriptions
+    if (selectedIcons.length === 0) {
+      const words = descLower.split(/\s+/);
+      const contextMatches = [];
+      
+      words.forEach(word => {
+        for (const [key, icons] of Object.entries(semanticIconMappings)) {
+          if (key.includes(word) || word.includes(key)) {
+            contextMatches.push(...icons);
+          }
+        }
+      });
+      
+      if (contextMatches.length > 0) {
+        // Remove duplicates and take first 6
+        selectedIcons = [...new Set(contextMatches)].slice(0, 6);
+      }
+    }
+    
+    // 4. Fallback with smart defaults based on common app types
+    if (selectedIcons.length === 0) {
+      if (descLower.includes('dashboard') || descLower.includes('admin')) {
+        selectedIcons = ['BarChart', 'Users', 'Settings', 'Activity', 'Bell', 'Grid'];
+      } else if (descLower.includes('portfolio') || descLower.includes('personal')) {
+        selectedIcons = ['User', 'Briefcase', 'Star', 'Eye', 'Mail', 'Share'];
+      } else if (descLower.includes('startup') || descLower.includes('company')) {
+        selectedIcons = ['Zap', 'TrendingUp', 'Target', 'Users', 'Award', 'Rocket'];
+      } else if (descLower.includes('creative') || descLower.includes('design')) {
+        selectedIcons = ['Palette', 'Camera', 'Edit', 'Star', 'Eye', 'Heart'];
+      } else {
+        // Ultimate fallback - versatile interface icons
+        selectedIcons = ['Home', 'Search', 'User', 'Settings', 'Bell', 'Mail'];
+      }
+    }
+    
+    // Ensure exactly 6 icons
+    return selectedIcons.slice(0, 6);
+  };
+
   // Advanced image analysis simulation
   const analyzeUploadedImage = async (imageFile) => {
     console.log('🔍 Analyzing uploaded image:', imageFile.name);
-    
     return new Promise((resolve) => {
       const img = new Image();
       const canvas = document.createElement('canvas');
@@ -50,7 +215,6 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
   const performAdvancedImageAnalysis = (imageFile, imageData) => {
     const { data, width, height } = imageData;
-    
     const colorAnalysis = analyzeColorDistribution(data);
     const brightnessAnalysis = analyzeBrightnessContrast(data);
     const complexityAnalysis = analyzeImageComplexity(width, height, data);
@@ -60,7 +224,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     const dominantColors = generateProfessional16ColorPalette(colorAnalysis, imageFile.name);
     const brandPersonality = determineBrandPersonality(colorAnalysis, brightnessAnalysis, imageFile.name);
     const suggestedCategories = suggestCategoriesFromVisuals(colorAnalysis, complexityAnalysis, imageFile.name);
-
+    
     return {
       dominantColors,
       detectedStyle,
@@ -88,26 +252,25 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      
       const hex = `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
       colorCounts[hex] = (colorCounts[hex] || 0) + 1;
       colors.push({ r, g, b });
     }
-    
+
     const sortedColors = Object.entries(colorCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20);
-    
+
     const avgSaturation = colors.reduce((sum, color) => {
       const max = Math.max(color.r, color.g, color.b);
       const min = Math.min(color.r, color.g, color.b);
       return sum + (max === 0 ? 0 : (max - min) / max);
     }, 0) / colors.length;
-    
+
     const hasGradients = sortedColors.length > 8 && avgSaturation > 0.3;
     const isPlayful = avgSaturation > 0.6;
     const harmony = avgSaturation > 0.4 ? 'vibrant' : avgSaturation > 0.2 ? 'balanced' : 'muted';
-    
+
     return {
       dominantColors: sortedColors.slice(0, 16).map(([color]) => color),
       avgSaturation,
@@ -122,24 +285,23 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     let totalBrightness = 0;
     let brightPixels = 0;
     let darkPixels = 0;
-    
+
     for (let i = 0; i < data.length; i += 40) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      
       const brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
       totalBrightness += brightness;
-      
+
       if (brightness > 0.7) brightPixels++;
       else if (brightness < 0.3) darkPixels++;
     }
-    
+
     const avgBrightness = totalBrightness / (data.length / 4);
     const contrast = brightPixels > 0 && darkPixels > 0 ? 'high' : 'low';
     const level = avgBrightness > 0.6 ? 'bright' : avgBrightness > 0.4 ? 'medium' : 'dark';
     const isProfessional = contrast === 'high' && (level === 'bright' || level === 'medium');
-    
+
     return {
       avgBrightness,
       contrast,
@@ -153,24 +315,24 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
   const analyzeImageComplexity = (width, height, data) => {
     const aspectRatio = width / height;
     const totalPixels = width * height;
-    
     let edges = 0;
+
     for (let i = 0; i < data.length - 4; i += 16) {
       const current = data[i] + data[i + 1] + data[i + 2];
       const next = data[i + 4] + data[i + 5] + data[i + 6];
       if (Math.abs(current - next) > 50) edges++;
     }
-    
+
     const complexity = edges / (totalPixels / 100);
     const level = complexity > 15 ? 'high' : complexity > 8 ? 'medium' : 'low';
     const isMinimal = complexity < 5;
-    
+
     const elements = [];
     if (complexity > 10) elements.push('detailed', 'complex');
     if (isMinimal) elements.push('minimal', 'clean');
     if (aspectRatio > 1.5 || aspectRatio < 0.7) elements.push('geometric');
     else elements.push('balanced');
-    
+
     return {
       complexity,
       level,
@@ -272,7 +434,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
     // Combine analyzed colors with professional palette
     const finalPalette = [...analyzedColors, ...selectedPalette].slice(0, 16);
-    
+
     // Ensure exactly 16 colors
     while (finalPalette.length < 16) {
       finalPalette.push(selectedPalette[finalPalette.length % selectedPalette.length]);
@@ -283,13 +445,13 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
   const determineBrandPersonality = (colorAnalysis, brightnessAnalysis, filename) => {
     const traits = [];
-    
+
     if (brightnessAnalysis.isProfessional) traits.push('professional', 'trustworthy', 'reliable');
     if (colorAnalysis.isPlayful) traits.push('creative', 'energetic', 'innovative');
     if (colorAnalysis.harmony === 'muted') traits.push('sophisticated', 'elegant', 'premium');
     if (colorAnalysis.harmony === 'vibrant') traits.push('bold', 'dynamic', 'modern');
     if (brightnessAnalysis.level === 'bright') traits.push('optimistic', 'friendly', 'approachable');
-    
+
     const filenameLower = filename.toLowerCase();
     if (filenameLower.includes('corporate') || filenameLower.includes('business')) {
       traits.push('corporate', 'authoritative', 'established');
@@ -298,25 +460,25 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     } else if (filenameLower.includes('tech') || filenameLower.includes('digital')) {
       traits.push('cutting-edge', 'efficient', 'scalable');
     }
-    
+
     return [...new Set(traits)].slice(0, 6);
   };
 
   const suggestCategoriesFromVisuals = (colorAnalysis, complexityAnalysis, filename) => {
     const categories = [];
-    
+
     if (complexityAnalysis.isMinimal) {
       categories.push('interface', 'navigation', 'minimal');
     } else if (complexityAnalysis.level === 'high') {
       categories.push('content', 'media', 'detailed');
     }
-    
+
     if (colorAnalysis.isPlayful) {
       categories.push('social', 'entertainment', 'lifestyle');
     } else if (colorAnalysis.harmony === 'muted') {
       categories.push('business', 'professional', 'corporate');
     }
-    
+
     const filenameLower = filename.toLowerCase();
     if (filenameLower.includes('dashboard') || filenameLower.includes('admin')) {
       categories.push('data', 'analytics', 'dashboard');
@@ -325,25 +487,25 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     } else if (filenameLower.includes('ecommerce') || filenameLower.includes('shop')) {
       categories.push('commerce', 'shopping', 'retail');
     }
-    
+
     const defaultCategories = ['interface', 'navigation', 'action', 'communication', 'data', 'content'];
     const finalCategories = [...new Set([...categories, ...defaultCategories])].slice(0, 6);
-    
+
     return finalCategories;
   };
 
   const performFilenameAnalysis = (imageFile) => {
     const filename = imageFile.name.toLowerCase();
     const hash = filename.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    
+
     // Use professional palette system for filename analysis too
     const dominantColors = generateProfessional16ColorPalette({ dominantColors: [] }, filename);
-    
+
     let detectedStyle = 'flat';
     let complexity = 'medium';
     let brandPersonality = ['modern', 'professional', 'sophisticated'];
     let suggestedCategories = ['interface', 'navigation', 'action'];
-    
+
     if (filename.includes('logo') || filename.includes('brand')) {
       detectedStyle = 'flat';
       complexity = 'low';
@@ -355,7 +517,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       brandPersonality = ['modern', 'clean', 'user-friendly', 'efficient'];
       suggestedCategories = ['interface', 'navigation', 'app'];
     }
-    
+
     return {
       dominantColors,
       detectedStyle,
@@ -380,8 +542,8 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
 
     try {
       const progressSteps = [
-        { step: 'Analyzing visual context...', progress: 20 },
-        { step: 'Processing color harmonies...', progress: 40 },
+        { step: 'Analyzing project context...', progress: 20 },
+        { step: 'Processing keyword semantics...', progress: 40 },
         { step: 'Generating contextual icons...', progress: 60 },
         { step: 'Applying professional styling...', progress: 80 },
         { step: 'Finalizing sophisticated icon set...', progress: 100 }
@@ -395,7 +557,6 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       const contextualIcons = generateContextualIcons(description, analysis, style);
       setGeneratedIcons(contextualIcons);
       onIconsGenerated?.(contextualIcons);
-
     } catch (error) {
       console.error('AI generation failed:', error);
     } finally {
@@ -404,42 +565,25 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     }
   };
 
-  // Generate professional 6-icon layout (same as community page)
+  // Generate professional 6-icon layout with enhanced keyword correlation
   const generateContextualIcons = (description, analysis, style) => {
     console.log('🎯 Generating professional icons based on analysis:', analysis);
-    
-    const iconSets = {
-      interface: ['Home', 'Search', 'User', 'Settings', 'Menu', 'Bell'],
-      navigation: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'ChevronLeft', 'ChevronRight'],
-      communication: ['Mail', 'MessageCircle', 'Phone', 'Video', 'Send', 'Share'],
-      data: ['BarChart', 'PieChart', 'TrendingUp', 'Activity', 'Database', 'Server'],
-      action: ['Plus', 'Edit', 'Trash', 'Download', 'Upload', 'Copy'],
-      social: ['Heart', 'Star', 'ThumbsUp', 'Users', 'Share2', 'MessageSquare'],
-      business: ['Briefcase', 'DollarSign', 'Target', 'Award', 'Shield', 'Lock'],
-      creative: ['Palette', 'Camera', 'Image', 'Music', 'Video', 'Edit3'],
-      ecommerce: ['ShoppingCart', 'Package', 'CreditCard', 'Gift', 'Tag', 'Truck'],
-      tech: ['Cpu', 'Smartphone', 'Monitor', 'Wifi', 'Cloud', 'Code']
-    };
+    console.log('📝 Project description:', description);
 
     let selectedIcons = [];
-    
+    let detectedCategory = 'interface'; // default
+
     if (analysis?.suggestedCategories) {
-      analysis.suggestedCategories.forEach(category => {
-        if (iconSets[category]) {
-          selectedIcons.push(...iconSets[category]);
-        }
-      });
+      detectedCategory = analysis.suggestedCategories[0];
+      console.log('🏷️ Detected category from analysis:', detectedCategory);
     }
+
+    // Get contextual icons based on description and category
+    selectedIcons = getContextualIcons(description, detectedCategory, Date.now());
     
-    if (selectedIcons.length === 0) {
-      selectedIcons = [
-        ...iconSets.interface.slice(0, 2),
-        ...iconSets.action.slice(0, 2),
-        ...iconSets.communication.slice(0, 2)
-      ];
-    }
-    
-    // Generate exactly 6 icons for community page layout
+    console.log('🎨 Generated contextual icons:', selectedIcons);
+
+    // Ensure exactly 6 icons for community page layout
     selectedIcons = [...new Set(selectedIcons)].slice(0, 6);
 
     return selectedIcons.map((iconName, index) => ({
@@ -455,18 +599,24 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       analysisContext: {
         basedOnUpload: !!uploadedImage,
         styleDetected: analysis?.detectedStyle,
-        complexityLevel: analysis?.complexity
+        complexityLevel: analysis?.complexity,
+        keywordMatch: description
       }
     }));
   };
 
   const getCategoryForIcon = (iconName, suggestedCategories) => {
     const iconCategoryMap = {
-      'Home': 'navigation', 'Search': 'interface', 'User': 'interface',
-      'Mail': 'communication', 'Plus': 'action', 'Edit': 'action',
-      'BarChart': 'data', 'Heart': 'social', 'ShoppingCart': 'ecommerce'
+      'Home': 'navigation',
+      'Search': 'interface',
+      'User': 'interface',
+      'Mail': 'communication',
+      'Plus': 'action',
+      'Edit': 'action',
+      'BarChart': 'data',
+      'Heart': 'social',
+      'ShoppingCart': 'ecommerce'
     };
-    
     return iconCategoryMap[iconName] || suggestedCategories[0] || 'interface';
   };
 
@@ -477,9 +627,9 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
       '3d': { strokeWidth: 1, fill: true, shadow: true, gradient: true },
       gradient: { strokeWidth: 1, fill: true, gradient: true, rounded: true }
     };
-    
+
     let variant = baseVariants[style] || baseVariants.flat;
-    
+
     if (characteristics?.isMinimal) {
       variant.strokeWidth = Math.max(1, variant.strokeWidth - 0.5);
     }
@@ -489,7 +639,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     if (characteristics?.isProfessional) {
       variant.rounded = false;
     }
-    
+
     return variant;
   };
 
@@ -498,15 +648,15 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     setGeneratedIcons(prev => prev.map(icon => 
-      icon.id === iconId ? {
-        ...icon,
-        color: analysisResults?.dominantColors?.[Math.floor(Math.random() * (analysisResults.dominantColors?.length || 16))] || 
-               `#${Math.floor(Math.random()*16777215).toString(16)}`,
-        aiConfidence: Math.random() * 0.3 + 0.7,
-        timestamp: Date.now()
-      } : icon
+      icon.id === iconId 
+        ? {
+            ...icon,
+            color: analysisResults?.dominantColors?.[Math.floor(Math.random() * (analysisResults.dominantColors?.length || 16))] || `#${Math.floor(Math.random()*16777215).toString(16)}`,
+            aiConfidence: Math.random() * 0.3 + 0.7,
+            timestamp: Date.now()
+          }
+        : icon
     ));
-    
     setRegeneratingIndex(null);
   };
 
@@ -533,7 +683,8 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
         analysis: analysisResults,
         colorPalette: analysisResults?.dominantColors || [],
         basedOnUpload: !!uploadedImage,
-        uploadedFileName: uploadedImage?.name
+        uploadedFileName: uploadedImage?.name,
+        projectDescription: projectDescription
       }
     };
 
@@ -568,6 +719,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
     if ((projectDescription || uploadedImage) && !isGenerating) {
       const triggerGeneration = async () => {
         let analysis = null;
+        
         if (uploadedImage) {
           console.log('🖼️ Professional image analysis starting...');
           analysis = await analyzeUploadedImage(uploadedImage);
@@ -580,7 +732,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
         
         generateAIIcons(projectDescription, analysis, selectedStyle);
       };
-
+      
       triggerGeneration();
     }
   }, [projectDescription, uploadedImage, selectedStyle]);
@@ -635,7 +787,10 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           <div>
             <h3 className="text-3xl font-bold text-warm-800 mb-2">Professional AI Icon Generator</h3>
             <p className="text-warm-600 text-lg">
-              {uploadedImage ? 'Image-based intelligent generation with 16-color palette' : 'Deep learning powered professional icon creation'}
+              {uploadedImage 
+                ? 'Image-based intelligent generation with 16-color palette' 
+                : 'Deep learning powered professional icon creation'
+              }
             </p>
             <div className="flex items-center space-x-4 mt-2">
               <div className="flex items-center space-x-2 text-sm text-warm-500">
@@ -649,6 +804,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
             </div>
           </div>
         </div>
+        
         <div className="flex items-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -681,7 +837,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                 {imageAnalysisData && ' (Image-based)'}
               </span>
             </h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm mb-8">
               <div className="bg-white/60 rounded-2xl p-4">
                 <span className="font-semibold text-warm-700 block mb-2">Detected Style</span>
@@ -702,7 +858,10 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                 <span className="font-semibold text-warm-700 block mb-4 text-lg">Brand Personality Traits</span>
                 <div className="flex flex-wrap gap-3">
                   {analysisResults.brandPersonality.slice(0, 6).map((trait, index) => (
-                    <span key={index} className="px-4 py-2 bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-700 rounded-2xl text-sm font-semibold border border-primary-200">
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-700 rounded-2xl text-sm font-semibold border border-primary-200"
+                    >
                       {trait}
                     </span>
                   ))}
@@ -778,10 +937,14 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
               <div>
                 <h4 className="font-bold text-warm-800 text-xl mb-2">Professional AI Generation in Progress</h4>
                 <p className="text-warm-600 text-lg">
-                  {uploadedImage ? 'Crafting professional icons based on your uploaded design...' : 'Creating your sophisticated professional icon set...'}
+                  {uploadedImage 
+                    ? 'Crafting professional icons based on your uploaded design...' 
+                    : 'Creating your sophisticated professional icon set...'
+                  }
                 </p>
               </div>
             </div>
+
             <div className="w-full bg-warm-200 rounded-full h-4 mb-3 shadow-neumorphic-inset">
               <motion.div
                 initial={{ width: 0 }}
@@ -795,7 +958,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
         )}
       </AnimatePresence>
 
-      {/* Professional Generated Icons Grid (Same layout as Community page) */}
+      {/* Professional Generated Icons Grid */}
       <AnimatePresence>
         {generatedIcons.length > 0 && (
           <motion.div
@@ -814,6 +977,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                   {selectedIcons.size} selected • Click to select • Right-click to edit • Professional 16-color system
                 </p>
               </div>
+              
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setSelectedIcons(new Set(generatedIcons.map(icon => icon.id)))}
@@ -840,7 +1004,7 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
               </div>
             </div>
 
-            {/* Professional 6-Icon Grid Layout (Same as Community page) */}
+            {/* Professional 6-Icon Grid Layout */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
               {generatedIcons.map((icon, index) => (
                 <motion.div
@@ -859,13 +1023,11 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                       handleEditIcon(icon);
                     }}
                     className={`aspect-square rounded-3xl flex items-center justify-center cursor-pointer transition-all duration-300 border-2 shadow-neumorphic hover:shadow-neumorphic-lg ${
-                      selectedIcons.has(icon.id)
-                        ? 'border-primary-400 bg-primary-50 shadow-neumorphic-inset'
+                      selectedIcons.has(icon.id) 
+                        ? 'border-primary-400 bg-primary-50 shadow-neumorphic-inset' 
                         : 'border-white/60 bg-white hover:border-primary-300'
                     }`}
-                    style={{ 
-                      backgroundColor: selectedIcons.has(icon.id) ? `${icon.color}15` : 'white'
-                    }}
+                    style={{ backgroundColor: selectedIcons.has(icon.id) ? `${icon.color}15` : 'white' }}
                     title="Right-click to edit in professional editor"
                   >
                     {regeneratingIndex === icon.id ? (
@@ -876,14 +1038,14 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                         <SafeIcon icon={FiRefreshCw} className="w-10 h-10 text-primary-500" />
                       </motion.div>
                     ) : (
-                      <SafeIcon 
-                        icon={getIconComponent(icon.id)} 
-                        className="w-10 h-10" 
-                        style={{ color: icon.color }} 
+                      <SafeIcon
+                        icon={getIconComponent(icon.id)}
+                        className="w-10 h-10"
+                        style={{ color: icon.color }}
                       />
                     )}
                   </motion.div>
-                  
+
                   {/* Professional Edit Button */}
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -895,18 +1057,18 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
                   >
                     <SafeIcon icon={FiEdit3} className="w-5 h-5" />
                   </motion.button>
-                  
+
                   {/* Professional AI Confidence Indicator */}
-                  <div 
+                  <div
                     className="absolute -top-2 -right-2 w-5 h-5 rounded-full border-2 border-white shadow-sm"
-                    style={{ 
+                    style={{
                       backgroundColor: icon.aiConfidence > 0.9 ? '#10b981' : 
-                                      icon.aiConfidence > 0.8 ? '#22c55e' :
-                                      icon.aiConfidence > 0.6 ? '#f59e0b' : '#ef4444'
+                                     icon.aiConfidence > 0.8 ? '#22c55e' : 
+                                     icon.aiConfidence > 0.6 ? '#f59e0b' : '#ef4444'
                     }}
                     title={`Professional AI Confidence: ${Math.round(icon.aiConfidence * 100)}%`}
                   />
-                  
+
                   {/* Enhanced Selection Indicator */}
                   <AnimatePresence>
                     {selectedIcons.has(icon.id) && (
@@ -935,7 +1097,8 @@ const AIIconGenerator = ({ projectDescription, uploadedImage, selectedStyle, onI
           </div>
           <h4 className="text-2xl font-bold text-warm-800 mb-4">Ready for Professional Generation</h4>
           <p className="text-warm-600 text-lg max-w-2xl mx-auto leading-relaxed">
-            Provide a project description or upload your design to get started with professional AI icon generation featuring our sophisticated 16-color palette system.
+            Provide a project description or upload your design to get started with professional AI icon generation 
+            featuring our sophisticated 16-color palette system.
           </p>
         </div>
       )}

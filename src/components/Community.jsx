@@ -261,16 +261,16 @@ const Community = () => {
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     // Animate in
     setTimeout(() => {
       const modalContent = modal.querySelector('#palette-modal');
       modalContent.style.transform = 'scale(1)';
       modalContent.style.opacity = '1';
     }, 10);
-    
+
     // Close on backdrop click
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
@@ -346,15 +346,15 @@ const Community = () => {
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     setTimeout(() => {
       const modalContent = modal.querySelector('#author-modal');
       modalContent.style.transform = 'scale(1)';
       modalContent.style.opacity = '1';
     }, 10);
-    
+
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.remove();
@@ -365,7 +365,6 @@ const Community = () => {
   const showNotification = (title, message, type = 'success') => {
     const notification = document.createElement('div');
     const colors = type === 'success' ? 'from-green-500 to-teal-500' : 'from-red-500 to-red-600';
-    
     notification.className = 'fixed top-6 right-6 z-[9999] bg-white rounded-2xl p-6 shadow-2xl border border-white/50 max-w-sm transform translate-x-full transition-transform duration-300';
     notification.innerHTML = `
       <div class="flex items-start space-x-4">
@@ -385,7 +384,7 @@ const Community = () => {
         </button>
       </div>
     `;
-    
+
     document.body.appendChild(notification);
     setTimeout(() => notification.style.transform = 'translateX(0)', 10);
     setTimeout(() => notification.remove(), 4000);
@@ -427,22 +426,24 @@ const Community = () => {
               />
             </div>
 
-            {/* Tabs */}
-            <div className="flex bg-warm-100 rounded-2xl p-2 shadow-neumorphic-inset">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-8 py-3 rounded-xl font-semibold text-base transition-all duration-300 flex items-center space-x-3 ${
-                    activeTab === tab.id
-                      ? `bg-gradient-to-r ${tab.color} text-white shadow-neumorphic-sm`
-                      : 'text-warm-600 hover:text-warm-800'
-                  }`}
-                >
-                  <SafeIcon icon={tab.icon} className="w-5 h-5" />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
+            {/* FIXED: Mobile Responsive Tabs */}
+            <div className="bg-warm-100 rounded-2xl p-2 shadow-neumorphic-inset">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 sm:px-6 lg:px-8 py-3 rounded-xl font-semibold text-xs sm:text-sm lg:text-base transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3 min-w-0 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? `bg-gradient-to-r ${tab.color} text-white shadow-neumorphic-sm`
+                        : 'text-warm-600 hover:text-warm-800'
+                    }`}
+                  >
+                    <SafeIcon icon={tab.icon} className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm lg:text-base font-medium">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
@@ -467,7 +468,7 @@ const Community = () => {
                       <h3 className="text-3xl font-bold text-warm-800">
                         {communityPalettes[0].name}
                       </h3>
-                      <button 
+                      <button
                         onClick={() => handleAuthorProfile(communityPalettes[0].author)}
                         className="text-warm-600 hover:text-primary-600 transition-colors duration-200 text-lg font-medium"
                       >
@@ -539,6 +540,7 @@ const Community = () => {
           <h2 className="text-3xl font-bold text-warm-800 mb-8">
             {searchTerm ? `Search Results (${filteredPalettes.length})` : 'All Palettes'}
           </h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredPalettes.map((palette, index) => (
               <motion.div
@@ -556,7 +558,7 @@ const Community = () => {
                       {palette.authorAvatar}
                     </div>
                     <div>
-                      <button 
+                      <button
                         onClick={() => handleAuthorProfile(palette.author)}
                         className="font-bold text-warm-800 hover:text-primary-600 transition-colors duration-200"
                       >
@@ -604,7 +606,9 @@ const Community = () => {
                       key={iconIndex}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       className="aspect-square bg-gradient-to-br from-white to-warm-50 rounded-2xl flex items-center justify-center shadow-neumorphic-sm group-hover:shadow-neumorphic transition-all duration-300 border border-white/50"
-                      style={{ backgroundColor: palette.colors[iconIndex % palette.colors.length] + '15' }}
+                      style={{
+                        backgroundColor: palette.colors[iconIndex % palette.colors.length] + '15',
+                      }}
                     >
                       <SafeIcon
                         icon={getIconComponent(iconName)}
