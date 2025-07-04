@@ -14,30 +14,15 @@ const Footer = () => {
     modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/10 backdrop-blur-md';
     
     const typeStyles = {
-      info: {
-        iconBg: 'from-primary-400 to-secondary-500',
-        icon: FiInfo,
-        borderColor: 'border-primary-200/50'
-      },
-      success: {
-        iconBg: 'from-green-400 to-teal-500',
-        icon: FiCheck,
-        borderColor: 'border-green-200/50'
-      },
-      document: {
-        iconBg: 'from-secondary-400 to-warm-500',
-        icon: FiFileText,
-        borderColor: 'border-secondary-200/50'
-      }
+      info: { iconBg: 'from-primary-400 to-secondary-500', icon: FiInfo, borderColor: 'border-primary-200/50' },
+      success: { iconBg: 'from-green-400 to-teal-500', icon: FiCheck, borderColor: 'border-green-200/50' },
+      document: { iconBg: 'from-secondary-400 to-warm-500', icon: FiFileText, borderColor: 'border-secondary-200/50' }
     };
-
+    
     const style = typeStyles[type] || typeStyles.info;
-
+    
     modal.innerHTML = `
-      <div class="bg-white/95 backdrop-blur-lg rounded-[2rem] p-8 max-w-2xl w-full border border-white/60 transform scale-95 opacity-0 transition-all duration-500" 
-           id="neuro-modal" 
-           style="box-shadow: 20px 20px 40px rgba(120,113,108,0.1), -20px -20px 40px rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.3);">
-        
+      <div class="bg-white/95 backdrop-blur-lg rounded-[2rem] p-8 max-w-2xl w-full border border-white/60 transform scale-95 opacity-0 transition-all duration-500" id="neuro-modal" style="box-shadow: 20px 20px 40px rgba(120,113,108,0.1), -20px -20px 40px rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.3);">
         <div class="flex items-center justify-between mb-8">
           <div class="flex items-center space-x-4">
             <div class="w-16 h-16 bg-gradient-to-br ${style.iconBg} rounded-[1.25rem] flex items-center justify-center shadow-neumorphic-sm">
@@ -50,27 +35,22 @@ const Footer = () => {
               <p class="text-warm-600">Iconify AI Platform</p>
             </div>
           </div>
-          <button onclick="this.closest('.fixed').remove()" 
-                  class="p-3 text-warm-400 hover:text-warm-600 hover:bg-warm-100 rounded-2xl transition-all duration-300"
-                  style="box-shadow: 6px 6px 12px rgba(120,113,108,0.1), -6px -6px 12px rgba(255,255,255,0.9);">
+          <button onclick="this.closest('.fixed').remove()" class="p-3 text-warm-400 hover:text-warm-600 hover:bg-warm-100 rounded-2xl transition-all duration-300" style="box-shadow: 6px 6px 12px rgba(120,113,108,0.1), -6px -6px 12px rgba(255,255,255,0.9);">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
           </button>
         </div>
-
-        <div class="bg-gradient-to-br from-warm-50 to-primary-50 rounded-[1.5rem] p-6 mb-8 border border-white/50"
-             style="box-shadow: inset 8px 8px 16px rgba(120,113,108,0.05), inset -8px -8px 16px rgba(255,255,255,0.9);">
+        
+        <div class="bg-gradient-to-br from-warm-50 to-primary-50 rounded-[1.5rem] p-6 mb-8 border border-white/50" style="box-shadow: inset 8px 8px 16px rgba(120,113,108,0.05), inset -8px -8px 16px rgba(255,255,255,0.9);">
           <div class="text-warm-700 leading-relaxed space-y-4">
             ${content}
           </div>
         </div>
-
+        
         <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
           ${actions.map(action => `
-            <button onclick="${action.onClick || 'this.closest(\'.fixed\').remove()'}" 
-                    class="flex-1 py-4 px-6 ${action.primary ? 'bg-gradient-to-r from-primary-500 via-secondary-500 to-warm-500 text-white' : 'bg-white text-warm-600 border border-warm-200'} rounded-2xl font-bold transition-all duration-300 flex items-center justify-center space-x-3"
-                    style="box-shadow: 8px 8px 16px rgba(120,113,108,0.1), -8px -8px 16px rgba(255,255,255,0.9);">
+            <button onclick="${action.onClick || 'this.closest(\'.fixed\').remove()'}" class="flex-1 py-4 px-6 ${action.primary ? 'bg-gradient-to-r from-primary-500 via-secondary-500 to-warm-500 text-white' : 'bg-white text-warm-600 border border-warm-200'} rounded-2xl font-bold transition-all duration-300 flex items-center justify-center space-x-3" style="box-shadow: 8px 8px 16px rgba(120,113,108,0.1), -8px -8px 16px rgba(255,255,255,0.9);">
               ${action.icon ? `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">${action.icon}</svg>` : ''}
               <span>${action.text}</span>
             </button>
@@ -99,6 +79,24 @@ const Footer = () => {
     return modal;
   };
 
+  // FIXED: Navigation function that properly closes modal and navigates
+  const navigateToPage = (path) => {
+    // Close any existing modals
+    const existingModals = document.querySelectorAll('.fixed.inset-0');
+    existingModals.forEach(modal => {
+      if (modal.classList.contains('z-\\[9999\\]')) {
+        modal.remove();
+      }
+    });
+
+    // Navigate using React Router
+    setTimeout(() => {
+      window.location.hash = path;
+      // Force page scroll to top
+      window.scrollTo(0, 0);
+    }, 100);
+  };
+
   const handleDocumentClick = (docType) => {
     let title, content, actions;
 
@@ -107,7 +105,6 @@ const Footer = () => {
         title = 'Documentation';
         content = `
           <h4 class="text-xl font-bold text-warm-800 mb-4">📚 Complete Developer Documentation</h4>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white/80 rounded-xl p-4" style="box-shadow: 4px 4px 8px rgba(120,113,108,0.1), -4px -4px 8px rgba(255,255,255,0.9);">
               <h5 class="font-semibold text-primary-700 mb-2">🚀 Getting Started</h5>
@@ -126,7 +123,6 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-
           <div class="bg-primary-50 rounded-xl p-4 mb-4">
             <h5 class="font-semibold text-primary-800 mb-2">📖 Available Sections</h5>
             <div class="grid grid-cols-2 gap-2 text-sm">
@@ -143,7 +139,7 @@ const Footer = () => {
           {
             text: 'View Full Docs',
             primary: true,
-            onClick: "window.location.hash = '/docs'",
+            onClick: `window.footerNavigation('/docs')`,
             icon: '<path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5z" clip-rule="evenodd" />'
           },
           { text: 'Close' }
@@ -154,7 +150,6 @@ const Footer = () => {
         title = 'API Documentation';
         content = `
           <h4 class="text-xl font-bold text-warm-800 mb-4">🔌 Powerful REST API</h4>
-          
           <div class="bg-warm-50 rounded-xl p-4 mb-6">
             <h5 class="font-semibold text-warm-800 mb-3">🌟 API Features</h5>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,17 +171,10 @@ const Footer = () => {
               </div>
             </div>
           </div>
-
           <div class="bg-green-50 rounded-xl p-4 mb-4">
             <h5 class="font-semibold text-green-800 mb-2">📝 Example Request</h5>
-            <pre class="bg-green-100 p-3 rounded-lg text-sm overflow-x-auto"><code>{
-  "prompt": "finance dashboard icons",
-  "style": "neumorphic",
-  "count": 6,
-  "format": "svg"
-}</code></pre>
+            <pre class="bg-green-100 p-3 rounded-lg text-sm overflow-x-auto"><code>{"prompt": "finance dashboard icons", "style": "neumorphic", "count": 6, "format": "svg"}</code></pre>
           </div>
-
           <div class="flex items-center space-x-3 text-sm">
             <div class="w-3 h-3 bg-green-400 rounded-full"></div>
             <span class="text-warm-600">Rate limit: 1000 requests/hour</span>
@@ -196,7 +184,7 @@ const Footer = () => {
           {
             text: 'Try API',
             primary: true,
-            onClick: "window.location.hash = '/api'",
+            onClick: `window.footerNavigation('/api')`,
             icon: '<path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />'
           },
           { text: 'Close' }
@@ -207,7 +195,6 @@ const Footer = () => {
         title = 'Help Center';
         content = `
           <h4 class="text-xl font-bold text-warm-800 mb-4">🆘 We're Here to Help</h4>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-blue-50 rounded-xl p-4">
               <h5 class="font-semibold text-blue-800 mb-3">🕒 Live Support</h5>
@@ -220,7 +207,6 @@ const Footer = () => {
               <p class="text-green-700 font-medium">Response within 24 hours</p>
             </div>
           </div>
-
           <div class="bg-purple-50 rounded-xl p-4 mb-4">
             <h5 class="font-semibold text-purple-800 mb-3">📚 Self-Help Resources</h5>
             <div class="grid grid-cols-2 gap-2 text-sm">
@@ -237,12 +223,12 @@ const Footer = () => {
           {
             text: 'Open Help Center',
             primary: true,
-            onClick: "window.location.hash = '/help'",
+            onClick: `window.footerNavigation('/help')`,
             icon: '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />'
           },
           {
             text: 'Contact Support',
-            onClick: "window.location.href = 'mailto:support@iconify-ai.com?subject=Support Request&body=Hi Iconify AI Team,%0A%0AI need help with...'",
+            onClick: "window.location.href='mailto:support@iconify-ai.com?subject=Support Request&body=Hi Iconify AI Team,%0A%0AI need help with...'",
             icon: '<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />'
           }
         ];
@@ -252,7 +238,6 @@ const Footer = () => {
         title = 'Privacy Policy';
         content = `
           <h4 class="text-xl font-bold text-warm-800 mb-4">🔒 Your Privacy Matters</h4>
-          
           <div class="space-y-4 mb-6">
             <div class="bg-green-50 rounded-xl p-4">
               <h5 class="font-semibold text-green-800 mb-2">✅ What We Protect</h5>
@@ -263,7 +248,6 @@ const Footer = () => {
                 <li>• Communication and support interactions</li>
               </ul>
             </div>
-
             <div class="bg-blue-50 rounded-xl p-4">
               <h5 class="font-semibold text-blue-800 mb-2">🛡️ How We Use Data</h5>
               <ul class="text-sm text-blue-700 space-y-1">
@@ -273,7 +257,6 @@ const Footer = () => {
                 <li>• Send important updates and notifications</li>
               </ul>
             </div>
-
             <div class="bg-yellow-50 rounded-xl p-4">
               <h5 class="font-semibold text-yellow-800 mb-2">🎯 Your Rights</h5>
               <ul class="text-sm text-yellow-700 space-y-1">
@@ -284,14 +267,13 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-
           <p class="text-sm text-warm-600">Last updated: ${new Date().toLocaleDateString()}</p>
         `;
         actions = [
           {
             text: 'Read Full Policy',
             primary: true,
-            onClick: "window.location.hash = '/privacy'",
+            onClick: `window.footerNavigation('/privacy')`,
             icon: '<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />'
           },
           { text: 'Close' }
@@ -302,16 +284,13 @@ const Footer = () => {
         title = 'Terms of Service';
         content = `
           <h4 class="text-xl font-bold text-warm-800 mb-4">📋 Terms of Service</h4>
-          
           <div class="space-y-4 mb-6">
             <div class="bg-primary-50 rounded-xl p-4">
               <h5 class="font-semibold text-primary-800 mb-2">📝 Service Agreement</h5>
               <p class="text-sm text-primary-700">
-                By using Iconify AI, you agree to our terms of service and acceptable use policy. 
-                Our platform is designed for professional and creative use in compliance with applicable laws.
+                By using Iconify AI, you agree to our terms of service and acceptable use policy. Our platform is designed for professional and creative use in compliance with applicable laws.
               </p>
             </div>
-
             <div class="bg-secondary-50 rounded-xl p-4">
               <h5 class="font-semibold text-secondary-800 mb-2">🎯 Permitted Use</h5>
               <ul class="text-sm text-secondary-700 space-y-1">
@@ -321,7 +300,6 @@ const Footer = () => {
                 <li>• Open source project integration</li>
               </ul>
             </div>
-
             <div class="bg-warm-50 rounded-xl p-4">
               <h5 class="font-semibold text-warm-800 mb-2">⚖️ Intellectual Property</h5>
               <ul class="text-sm text-warm-700 space-y-1">
@@ -332,7 +310,6 @@ const Footer = () => {
               </ul>
             </div>
           </div>
-
           <div class="flex items-center space-x-2 text-sm text-warm-600">
             <div class="w-2 h-2 bg-green-400 rounded-full"></div>
             <span>Effective: ${new Date().toLocaleDateString()}</span>
@@ -342,7 +319,7 @@ const Footer = () => {
           {
             text: 'Read Full Terms',
             primary: true,
-            onClick: "window.location.hash = '/terms'",
+            onClick: `window.footerNavigation('/terms')`,
             icon: '<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />'
           },
           { text: 'Close' }
@@ -352,6 +329,9 @@ const Footer = () => {
       default:
         return;
     }
+
+    // Make navigation function available globally for modal buttons
+    window.footerNavigation = navigateToPage;
 
     createNeumorphicModal(title, content, 'document', actions);
   };
@@ -428,81 +408,36 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    {
-      icon: FiGithub,
-      href: 'https://github.com/iconify-ai',
-      label: 'GitHub'
-    },
-    {
-      icon: FiTwitter,
-      href: 'https://twitter.com/iconify_ai',
-      label: 'Twitter'
-    },
-    {
-      icon: FiMail,
-      href: 'mailto:hello@iconify-ai.com',
-      label: 'Email'
-    },
+    { icon: FiGithub, href: 'https://github.com/iconify-ai', label: 'GitHub' },
+    { icon: FiTwitter, href: 'https://twitter.com/iconify_ai', label: 'Twitter' },
+    { icon: FiMail, href: 'mailto:hello@iconify-ai.com', label: 'Email' },
   ];
 
   const quickLinks = [
-    {
-      label: 'Create Icons',
-      path: '/creator',
-      icon: FiCode
-    },
-    {
-      label: 'Gallery',
-      path: '/community',
-      icon: FiBook
-    },
-    {
-      label: 'Documentation',
-      action: () => handleDocumentClick('documentation')
-    },
-    {
-      label: 'API',
-      action: () => handleDocumentClick('api')
-    }
+    { label: 'Create Icons', path: '/creator', icon: FiCode },
+    { label: 'Gallery', path: '/community', icon: FiBook },
+    { label: 'Documentation', action: () => handleDocumentClick('documentation') },
+    { label: 'API', action: () => handleDocumentClick('api') }
   ];
 
   const supportLinks = [
-    {
-      label: 'Help Center',
-      icon: FiHelpCircle,
-      action: () => handleDocumentClick('help')
-    },
-    {
-      label: 'Contact Us',
-      icon: FiPhone,
-      action: () => {
-        window.location.href = 'mailto:support@iconify-ai.com?subject=Support Request&body=Hi Iconify AI Team,%0A%0AI need help with...';
-      }
-    },
-    {
-      label: 'Privacy Policy',
-      icon: FiShield,
-      action: () => handleDocumentClick('privacy')
-    },
-    {
-      label: 'Terms of Service',
-      icon: FiFileText,
-      action: () => handleDocumentClick('terms')
-    }
+    { label: 'Help Center', icon: FiHelpCircle, action: () => handleDocumentClick('help') },
+    { label: 'Contact Us', icon: FiPhone, action: () => { window.location.href = 'mailto:support@iconify-ai.com?subject=Support Request&body=Hi Iconify AI Team,%0A%0AI need help with...'; } },
+    { label: 'Privacy Policy', icon: FiShield, action: () => handleDocumentClick('privacy') },
+    { label: 'Terms of Service', icon: FiFileText, action: () => handleDocumentClick('terms') }
   ];
 
   const handleLinkClick = (link) => {
     if (link.action) {
       link.action();
     } else if (link.path) {
-      window.location.hash = link.path;
+      navigateToPage(link.path);
     }
   };
 
   const showNewsletterModal = () => {
     const content = `
       <h4 class="text-xl font-bold text-warm-800 mb-4">📬 Stay Updated with Iconify AI</h4>
-      
       <div class="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl p-4 mb-4">
         <h5 class="font-semibold text-primary-800 mb-2">✨ What You'll Receive</h5>
         <ul class="text-sm text-primary-700 space-y-1">
@@ -512,7 +447,6 @@ const Footer = () => {
           <li>• Special offers and free resources</li>
         </ul>
       </div>
-
       <div class="bg-green-50 rounded-xl p-4 mb-4">
         <h5 class="font-semibold text-green-800 mb-2">🎯 Newsletter Benefits</h5>
         <div class="grid grid-cols-2 gap-2 text-sm text-green-700">
@@ -522,7 +456,6 @@ const Footer = () => {
           <div>• Valuable content only</div>
         </div>
       </div>
-
       <p class="text-warm-600 text-sm">Join over 5,000 designers and developers who trust our newsletter!</p>
     `;
 
@@ -540,7 +473,6 @@ const Footer = () => {
   const showVersionModal = () => {
     const content = `
       <h4 class="text-xl font-bold text-warm-800 mb-4">🚀 What's New in v2.0.0</h4>
-      
       <div class="space-y-4">
         <div class="bg-green-50 rounded-xl p-4">
           <h5 class="font-semibold text-green-800 mb-2">✨ New Features</h5>
@@ -551,7 +483,6 @@ const Footer = () => {
             <li>• Advanced export options (SVG, PNG, React)</li>
           </ul>
         </div>
-
         <div class="bg-blue-50 rounded-xl p-4">
           <h5 class="font-semibold text-blue-800 mb-2">⚡ Performance Improvements</h5>
           <ul class="text-sm text-blue-700 space-y-1">
@@ -561,7 +492,6 @@ const Footer = () => {
             <li>• Enhanced accessibility features</li>
           </ul>
         </div>
-
         <div class="bg-purple-50 rounded-xl p-4">
           <h5 class="font-semibold text-purple-800 mb-2">🔧 Developer Tools</h5>
           <ul class="text-sm text-purple-700 space-y-1">
@@ -578,7 +508,7 @@ const Footer = () => {
       {
         text: 'View Full Changelog',
         primary: true,
-        onClick: "window.location.hash = '/changelog'; this.closest('.fixed').remove();",
+        onClick: "window.footerNavigation('/changelog'); this.closest('.fixed').remove();",
         icon: '<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />'
       },
       { text: 'Close' }
@@ -745,7 +675,7 @@ const Footer = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => window.location.hash = '/creator'}
+                onClick={() => navigateToPage('/creator')}
                 className="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl font-medium text-sm shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
               >
                 Start Creating
@@ -753,7 +683,7 @@ const Footer = () => {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => window.location.hash = '/community'}
+                onClick={() => navigateToPage('/community')}
                 className="px-4 py-2 bg-white text-warm-600 rounded-xl font-medium text-sm border border-warm-200 hover:bg-warm-50 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
               >
                 Browse Gallery

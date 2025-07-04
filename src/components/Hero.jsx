@@ -283,11 +283,16 @@ const Hero = () => {
             {/* Main Demo Card */}
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-neumorphic-lg border border-white/60 relative">
               
-              {/* Demo Header */}
+              {/* Demo Header with Dynamic Icons Badge */}
               <div className="flex items-center justify-between mb-8">
-                <div>
+                <div className="flex-1">
                   <h3 className="text-xl font-bold text-warm-800">AI Icon Generation</h3>
-                  <p className="text-warm-600">Professional • Contextual • Instant</p>
+                  <div className="flex items-center space-x-3 mt-1">
+                    <span className="text-warm-600">Professional • Contextual • Instant</span>
+                    <div className="px-3 py-1 bg-gradient-to-r from-green-100 to-teal-100 rounded-full border border-green-200 shadow-neumorphic-sm">
+                      <span className="text-xs font-bold text-green-700">🎲 Dynamic Icons</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
@@ -350,11 +355,6 @@ const Hero = () => {
                 >
                   Export SVG
                 </motion.button>
-              </div>
-
-              {/* Dynamic indicator */}
-              <div className="absolute top-4 left-4 px-3 py-1 bg-gradient-to-r from-green-100 to-teal-100 rounded-full border border-green-200">
-                <span className="text-xs font-bold text-green-700">🎲 Dynamic Icons</span>
               </div>
             </div>
 
