@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Enhanced neumorphic color palette
+        // Original neumorphic color palette
         warm: {
           50: '#fefcfb',
-          100: '#fef7ed', 
+          100: '#fef7ed',
           200: '#fed7aa',
           300: '#fdba74',
           400: '#fb923c',
