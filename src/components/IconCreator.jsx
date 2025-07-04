@@ -121,7 +121,7 @@ const ProjectStep = ({ onNext, onData, canProceed }) => {
 // Step 2: Icon Generation & Selection
 const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => {
   const [generatedIcons, setGeneratedIcons] = useState([]);
-  const [selectedIcons, setSelectedIcons] = useState(new Set());
+  const [selectedIconIds, setSelectedIconIds] = useState(new Set());
   const [isGenerating, setIsGenerating] = useState(true);
   const [generationId, setGenerationId] = useState(Date.now());
 
@@ -129,24 +129,32 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
     generateUniqueIcons();
   }, [projectData]);
 
+  // Update parent with selected icons whenever selection changes
+  React.useEffect(() => {
+    const selectedIconsData = generatedIcons.filter(icon => selectedIconIds.has(icon.id));
+    console.log('🔄 Selection updated:', selectedIconsData.length, 'icons selected');
+    onData?.({ selectedIcons: selectedIconsData });
+  }, [selectedIconIds, generatedIcons, onData]);
+
   // Generate unique icons with timestamp-based seeding
   const generateUniqueIcons = async () => {
     setIsGenerating(true);
-    setSelectedIcons(new Set());
+    setSelectedIconIds(new Set());
     
     // Use current timestamp + random for true uniqueness
     const uniqueSeed = Date.now() + Math.random();
     setGenerationId(uniqueSeed);
     
     await new Promise(resolve => setTimeout(resolve, 2000));
-
+    
     const iconSuggestions = getUniqueIconSuggestions(
-      projectData?.description || '', 
+      projectData?.description || '',
       projectData?.category || '',
       uniqueSeed
     );
+    
     const colors = getUniqueColorPalette(projectData?.category || '', uniqueSeed);
-
+    
     const icons = iconSuggestions.map((iconName, index) => ({
       id: `${iconName}-${uniqueSeed}-${index}`,
       name: iconName,
@@ -159,9 +167,10 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
       generated: true,
       timestamp: uniqueSeed
     }));
-
+    
     setGeneratedIcons(icons);
     setIsGenerating(false);
+    console.log('✅ Generated icons:', icons.length);
   };
 
   const getIconComponent = (iconName) => {
@@ -255,17 +264,15 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
   };
 
   const toggleIconSelection = (iconId) => {
-    const newSelection = new Set(selectedIcons);
+    const newSelection = new Set(selectedIconIds);
     if (newSelection.has(iconId)) {
       newSelection.delete(iconId);
+      console.log('🗑️ Deselected icon:', iconId);
     } else {
       newSelection.add(iconId);
+      console.log('✅ Selected icon:', iconId);
     }
-    setSelectedIcons(newSelection);
-    
-    // Update parent with selected icons
-    const selectedIconData = generatedIcons.filter(icon => newSelection.has(icon.id));
-    onData?.({ selectedIcons: selectedIconData });
+    setSelectedIconIds(newSelection);
   };
 
   if (isGenerating) {
@@ -301,7 +308,7 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
         </div>
         <h2 className="text-3xl font-bold text-warm-800 mb-4">Select Your Icons</h2>
         <p className="text-warm-600 text-lg max-w-2xl mx-auto">
-          Choose the icons that best fit your project ({selectedIcons.size} selected)
+          Choose the icons that best fit your project ({selectedIconIds.size} selected)
         </p>
       </div>
 
@@ -316,7 +323,7 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
             whileTap={{ scale: 0.95 }}
             onClick={() => toggleIconSelection(icon.id)}
             className={`aspect-square p-6 rounded-2xl transition-all duration-300 flex items-center justify-center border-2 relative group ${
-              selectedIcons.has(icon.id)
+              selectedIconIds.has(icon.id)
                 ? 'bg-gradient-to-br from-primary-500 to-secondary-500 text-white border-primary-400 shadow-neumorphic-lg'
                 : 'bg-white border-warm-200 text-warm-700 hover:border-primary-300 shadow-neumorphic-sm hover:shadow-neumorphic'
             }`}
@@ -324,11 +331,11 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
             <SafeIcon
               icon={icon.iconComponent}
               className="w-10 h-10 transition-transform duration-200"
-              style={{ color: selectedIcons.has(icon.id) ? 'white' : icon.color }}
+              style={{ color: selectedIconIds.has(icon.id) ? 'white' : icon.color }}
             />
             
             {/* Selection indicator */}
-            {selectedIcons.has(icon.id) && (
+            {selectedIconIds.has(icon.id) && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -353,7 +360,7 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
         </motion.button>
       </div>
 
-      {!canProceed && selectedIcons.size === 0 && (
+      {!canProceed && selectedIconIds.size === 0 && (
         <div className="p-4 bg-warm-50 border border-warm-200 rounded-2xl">
           <p className="text-warm-600 text-center">
             <span className="font-semibold">Select at least one icon</span> to proceed to customization.
@@ -383,40 +390,129 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
     }
   }, [selectedIcons]);
 
-  const createSVG = (icon, settings) => {
-    const { size, color, strokeWidth, style } = settings;
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <style>
-          .icon-path {
-            fill: ${style === 'filled' ? color : 'none'};
-            stroke: ${color};
-            stroke-width: ${strokeWidth};
-            stroke-linecap: round;
-            stroke-linejoin: round;
-          }
-        </style>
-      </defs>
-      ${getIconPaths(icon.name, 'icon-path')}
-    </svg>`.trim();
+  // Comprehensive SVG path database with accurate Feather icon paths
+  const getIconPaths = (iconName) => {
+    const iconPaths = {
+      // Basic Interface
+      'Home': 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
+      'Search': 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z m21 21-4.35-4.35',
+      'User': 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+      'Settings': 'M12.22 2l-.44.1a9.94 9.94 0 0 0-7.75 7.75L4 10.22v3.56l.03.44a9.94 9.94 0 0 0 7.75 7.75l.44.03h.44l.44-.03a9.94 9.94 0 0 0 7.75-7.75l.03-.44v-3.56l-.03-.44a9.94 9.94 0 0 0-7.75-7.75L12.66 2l-.44-.03h-.44z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+      'Menu': 'M3 12h18 M3 6h18 M3 18h18',
+      'Bell': 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
+      
+      // Communication
+      'Mail': 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z m22 6-10 7L2 6',
+      'Phone': 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z',
+      'MessageCircle': 'M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z',
+      'Send': 'M22 2L2 8.5l9.5 1L13 19l9-17z',
+      
+      // Actions
+      'Plus': 'M12 5v14 M5 12h14',
+      'Minus': 'M5 12h14',
+      'Edit': 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 m-1.5-9.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
+      'Trash': 'M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6',
+      'Copy': 'M20 9H11a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+      'Download': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3',
+      'Upload': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12',
+      
+      // Social
+      'Heart': 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
+      'Star': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+      'ThumbsUp': 'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
+      'Share': 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13',
+      'Users': 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
+      
+      // Business & Finance
+      'Briefcase': 'M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16 M22 8H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8z M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2',
+      'DollarSign': 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+      'TrendingUp': 'M23 6l-9.5 9.5-5-5L1 18 M23 6h-6 M23 6v6',
+      'BarChart': 'M12 20V10 M18 20V4 M6 20v-4',
+      'PieChart': 'M21.21 15.89A10 10 0 1 1 8 2.83 M22 12A10 10 0 0 0 12 2v10z',
+      'Target': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+      'Award': 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
+      
+      // Technology
+      'Smartphone': 'M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z M12 18h.01',
+      'Monitor': 'M20 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z M8 21h8 M12 17v4',
+      'Cpu': 'M4 4h16v16H4z M9 9h6v6H9z M9 1v6 M15 1v6 M9 17v6 M15 17v6 M1 9h6 M17 9h6 M1 15h6 M17 15h6',
+      'Wifi': 'M5 12.55a11 11 0 0 1 14.08 0 M1.42 9a16 16 0 0 1 21.16 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01',
+      'Database': 'M21 12c0 1.66-4 3-9 3s-9-1.34-9-3 M3 5c0 1.66 4 3 9 3s9-1.34 9-3 M3 5c0-1.66 4-3 9-3s9 1.34 9 3v14c0 1.66-4 3-9 3s-9-1.34-9-3V5z M3 12v7c0 1.66 4 3 9 3s9-1.34 9-3v-7',
+      'Server': 'M20 3H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z M20 13H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z M6 7h.01 M6 17h.01',
+      'Cloud': 'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',
+      'Code': 'M16 18l6-6-6-6 M8 6l-6 6 6 6',
+      
+      // Health
+      'Activity': 'm22 12-4-4v3H9.5a3.5 3.5 0 0 1-3.5-3.5V7 M2 12l4 4v-3h8.5a3.5 3.5 0 0 1 3.5 3.5V17',
+      'Zap': 'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
+      'Shield': 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+      
+      // Navigation & Direction  
+      'ArrowLeft': 'M19 12H6 M12 5l-7 7 7 7',
+      'ArrowRight': 'M5 12h13 M12 5l7 7-7 7',
+      'ArrowUp': 'M12 19V6 M5 12l7-7 7 7',
+      'ArrowDown': 'M12 5v13 M19 12l-7 7-7-7',
+      'ChevronLeft': 'M15 18l-6-6 6-6',
+      'ChevronRight': 'M9 18l6-6-6-6',
+      'ChevronUp': 'M18 15l-6-6-6 6',
+      'ChevronDown': 'M6 9l6 6 6-6',
+      
+      // Time & Calendar
+      'Clock': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
+      'Calendar': 'M3 4h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M16 2v4 M8 2v4 M3 10h18',
+      
+      // Media & Files
+      'Image': 'M15 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M21 21H3V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16z M3 16l5-5c.928-.893 2.072-.893 3 0l5 5',
+      'File': 'M14 3v4a1 1 0 0 0 1 1h4 M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z',
+      'Folder': 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
+      
+      // Tools & Objects
+      'Tool': 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+      'Wrench': 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+      'Lock': 'M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 10 0v4',
+      'Key': 'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4',
+      
+      // Default fallback
+      'Circle': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z'
+    };
+    
+    return iconPaths[iconName] || iconPaths['Circle'];
   };
 
-  const getIconPaths = (iconName, className) => {
-    const iconPaths = {
-      'User': `<path class="${className}" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle class="${className}" cx="12" cy="7" r="4"></circle>`,
-      'Home': `<path class="${className}" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline class="${className}" points="9,22 9,12 15,12 15,22"></polyline>`,
-      'Search': `<circle class="${className}" cx="11" cy="11" r="8"></circle><path class="${className}" d="m21 21-4.35-4.35"></path>`,
-      'Settings': `<circle class="${className}" cx="12" cy="12" r="3"></circle><path class="${className}" d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>`,
-      'Heart': `<path class="${className}" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>`,
-      'Star': `<polygon class="${className}" points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"></polygon>`,
-      'Mail': `<path class="${className}" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline class="${className}" points="22,6 12,13 2,6"></polyline>`
-    };
-    return iconPaths[iconName] || `<circle class="${className}" cx="12" cy="12" r="10"></circle>`;
+  const createSVG = (icon, settings) => {
+    const { size, color, strokeWidth, style } = settings;
+    const paths = getIconPaths(icon.name);
+    
+    // Split multiple path commands
+    const pathCommands = paths.split(' M').map((path, index) => 
+      index === 0 ? path : 'M' + path
+    );
+    
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .icon-path {
+        fill: ${style === 'filled' ? color : 'none'};
+        stroke: ${color};
+        stroke-width: ${strokeWidth};
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+  ${pathCommands.map(pathData => 
+    `<path class="icon-path" d="${pathData.trim()}" />`
+  ).join('\n  ')}
+</svg>`.trim();
   };
 
   const downloadIcon = async (icon) => {
     const settings = iconSettings[icon.id] || {};
     const svgContent = createSVG(icon, settings);
+    
+    console.log('📥 Downloading icon:', icon.name);
+    console.log('🎨 SVG Content:', svgContent);
+    
     const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -488,14 +584,14 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
                   }}
                 />
               </div>
-
+              
               <div className="text-center mb-6">
                 <h3 className="font-bold text-warm-800 mb-2 text-xl">{icon.name}</h3>
                 <p className="text-warm-600">
                   {settings.size || icon.size || 48}px • {settings.color || icon.color}
                 </p>
               </div>
-
+              
               <div className="flex space-x-3">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
