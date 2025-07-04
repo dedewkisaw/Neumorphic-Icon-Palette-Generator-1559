@@ -26,7 +26,6 @@ const ProjectStep = ({ onNext, onData, canProceed }) => {
     { id: 'neumorphic', name: 'Neumorphic', preview: '◐', description: 'Soft 3D effect' },
   ];
 
-  // Update parent component when data changes
   React.useEffect(() => {
     onData?.({ description, category, style });
   }, [description, category, style, onData]);
@@ -129,19 +128,16 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
     generateUniqueIcons();
   }, [projectData]);
 
-  // Update parent with selected icons whenever selection changes
   React.useEffect(() => {
     const selectedIconsData = generatedIcons.filter(icon => selectedIconIds.has(icon.id));
     console.log('🔄 Selection updated:', selectedIconsData.length, 'icons selected');
     onData?.({ selectedIcons: selectedIconsData });
   }, [selectedIconIds, generatedIcons, onData]);
 
-  // Generate unique icons with timestamp-based seeding
   const generateUniqueIcons = async () => {
     setIsGenerating(true);
     setSelectedIconIds(new Set());
     
-    // Use current timestamp + random for true uniqueness
     const uniqueSeed = Date.now() + Math.random();
     setGenerationId(uniqueSeed);
     
@@ -178,7 +174,6 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
     return FiIcons[iconKey] || FiIcons.FiCircle;
   };
 
-  // Enhanced unique icon suggestions with rotation
   const getUniqueIconSuggestions = (description, category, seed) => {
     const iconPools = {
       business: [
@@ -334,7 +329,6 @@ const GenerationStep = ({ onNext, onPrev, projectData, onData, canProceed }) => 
               style={{ color: selectedIconIds.has(icon.id) ? 'white' : icon.color }}
             />
             
-            {/* Selection indicator */}
             {selectedIconIds.has(icon.id) && (
               <motion.div
                 initial={{ scale: 0 }}
@@ -390,138 +384,277 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
     }
   }, [selectedIcons]);
 
-  // Comprehensive SVG path database with accurate Feather icon paths
-  const getIconPaths = (iconName) => {
-    const iconPaths = {
-      // Basic Interface
-      'Home': 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
-      'Search': 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z m21 21-4.35-4.35',
-      'User': 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
-      'Settings': 'M12.22 2l-.44.1a9.94 9.94 0 0 0-7.75 7.75L4 10.22v3.56l.03.44a9.94 9.94 0 0 0 7.75 7.75l.44.03h.44l.44-.03a9.94 9.94 0 0 0 7.75-7.75l.03-.44v-3.56l-.03-.44a9.94 9.94 0 0 0-7.75-7.75L12.66 2l-.44-.03h-.44z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
-      'Menu': 'M3 12h18 M3 6h18 M3 18h18',
-      'Bell': 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
+  // Get actual React Icon element and extract SVG content
+  const getIconSVGContent = (iconName) => {
+    try {
+      // Create the icon component
+      const IconComponent = FiIcons[`Fi${iconName}`] || FiIcons.FiHome;
       
-      // Communication
-      'Mail': 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z m22 6-10 7L2 6',
-      'Phone': 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z',
-      'MessageCircle': 'M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z',
-      'Send': 'M22 2L2 8.5l9.5 1L13 19l9-17z',
+      // Create a temporary container to render the icon
+      const tempDiv = document.createElement('div');
+      tempDiv.style.display = 'none';
+      document.body.appendChild(tempDiv);
       
-      // Actions
-      'Plus': 'M12 5v14 M5 12h14',
-      'Minus': 'M5 12h14',
-      'Edit': 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 m-1.5-9.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
-      'Trash': 'M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6',
-      'Copy': 'M20 9H11a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
-      'Download': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3',
-      'Upload': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12',
+      // Create React element and render it
+      const iconElement = React.createElement(IconComponent, { size: 24 });
       
-      // Social
-      'Heart': 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
-      'Star': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
-      'ThumbsUp': 'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
-      'Share': 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13',
-      'Users': 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
+      // We need to use a different approach - get the SVG from the actual component
+      // Let's use a mapping of known Feather icon paths instead
+      const iconPaths = {
+        'Home': 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
+        'Search': 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z m21 21-4.35-4.35',
+        'User': 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+        'Settings': 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z',
+        'Heart': 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
+        'Star': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+        'Mail': 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z m18 2-10 7L2 6',
+        'Bell': 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
+        'Download': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3',
+        'Upload': 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12',
+        'Edit': 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
+        'Trash': 'M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2 M10 11v6 M14 11v6',
+        'Plus': 'M12 5v14 M5 12h14',
+        'Copy': 'M9 9h13v13H9z M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+        'Share': 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13',
+        'Users': 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+        'Briefcase': 'M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16 M2 7h20v13a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z',
+        'DollarSign': 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+        'TrendingUp': 'M23 6l-9.5 9.5-5-5L1 18 M17 6h6v6',
+        'BarChart': 'M12 20V10 M18 20V4 M6 20v-4',
+        'PieChart': 'M21.21 15.89A10 10 0 1 1 8 2.83 M22 12A10 10 0 0 0 12 2v10z',
+        'Target': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+        'Award': 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
+        'Smartphone': 'M5 2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z M12 18h.01',
+        'Monitor': 'M2 3h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V3z M8 21h8 M12 17v4',
+        'Cpu': 'M4 4h16v16H4z M9 9h6v6H9z M9 1v3 M15 1v3 M9 20v3 M15 20v3 M20 9h3 M20 15h3 M1 9h3 M1 15h3',
+        'Wifi': 'M5 12.55a11 11 0 0 1 14.08 0 M1.42 9a16 16 0 0 1 21.16 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01',
+        'Database': 'M12 8a9 3 0 1 0 0-6 9 3 0 0 0 0 6z M21 12c0 1.66-4 3-9 3s-9-1.34-9-3 M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5',
+        'Server': 'M2 2h20v8H2z M2 14h20v8H2z M6 6h.01 M6 18h.01',
+        'Cloud': 'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',
+        'Code': 'M16 18l6-6-6-6 M8 6l-6 6 6 6',
+        'Activity': 'M22 12h-4l-3 9L9 3l-3 9H2',
+        'Zap': 'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
+        'Shield': 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+        'Clock': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
+        'Calendar': 'M3 4h18v18H3V4z M16 2v4 M8 2v4 M3 10h18',
+        'Image': 'M3 3h18v18H3V3z M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21',
+        'File': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6',
+        'Folder': 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
+        'Tool': 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+        'Lock': 'M3 11h18v11H3V11z M12 7a4 4 0 1 0 0 8',
+        'Key': 'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4',
+        'Building': 'M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18H6z M6 12h12 M16 6h2 M16 10h2 M16 14h2 M16 18h2 M8 6h2 M8 10h2 M8 14h2 M8 18h2',
+        'Globe': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'
+      };
       
-      // Business & Finance
-      'Briefcase': 'M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16 M22 8H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8z M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2',
-      'DollarSign': 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
-      'TrendingUp': 'M23 6l-9.5 9.5-5-5L1 18 M23 6h-6 M23 6v6',
-      'BarChart': 'M12 20V10 M18 20V4 M6 20v-4',
-      'PieChart': 'M21.21 15.89A10 10 0 1 1 8 2.83 M22 12A10 10 0 0 0 12 2v10z',
-      'Target': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
-      'Award': 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
+      // Clean up
+      document.body.removeChild(tempDiv);
       
-      // Technology
-      'Smartphone': 'M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z M12 18h.01',
-      'Monitor': 'M20 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z M8 21h8 M12 17v4',
-      'Cpu': 'M4 4h16v16H4z M9 9h6v6H9z M9 1v6 M15 1v6 M9 17v6 M15 17v6 M1 9h6 M17 9h6 M1 15h6 M17 15h6',
-      'Wifi': 'M5 12.55a11 11 0 0 1 14.08 0 M1.42 9a16 16 0 0 1 21.16 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01',
-      'Database': 'M21 12c0 1.66-4 3-9 3s-9-1.34-9-3 M3 5c0 1.66 4 3 9 3s9-1.34 9-3 M3 5c0-1.66 4-3 9-3s9 1.34 9 3v14c0 1.66-4 3-9 3s-9-1.34-9-3V5z M3 12v7c0 1.66 4 3 9 3s9-1.34 9-3v-7',
-      'Server': 'M20 3H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z M20 13H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z M6 7h.01 M6 17h.01',
-      'Cloud': 'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',
-      'Code': 'M16 18l6-6-6-6 M8 6l-6 6 6 6',
+      return iconPaths[iconName] || iconPaths['Home'];
       
-      // Health
-      'Activity': 'm22 12-4-4v3H9.5a3.5 3.5 0 0 1-3.5-3.5V7 M2 12l4 4v-3h8.5a3.5 3.5 0 0 1 3.5 3.5V17',
-      'Zap': 'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
-      'Shield': 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+    } catch (error) {
+      console.warn(`Could not get SVG for icon: ${iconName}`, error);
+      return 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z'; // fallback circle
+    }
+  };
+
+  const createCorrectSVG = (icon, settings) => {
+    const { size, color, strokeWidth, style } = settings;
+    const pathData = getIconSVGContent(icon.name);
+    
+    const fillValue = style === 'filled' ? color : 'none';
+    const strokeValue = style === 'filled' ? 'none' : color;
+    const strokeWidthValue = style === 'filled' ? 0 : strokeWidth;
+    
+    // Split path data by 'M' to handle multiple paths
+    const paths = pathData.split('M').filter(p => p.trim()).map(p => 'M' + p.trim());
+    
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+${paths.map(path => 
+  `  <path d="${path}" fill="${fillValue}" stroke="${strokeValue}" stroke-width="${strokeWidthValue}" stroke-linecap="round" stroke-linejoin="round"/>`
+).join('\n')}
+</svg>`;
+  };
+
+  const createPNGFromSVG = async (icon, settings) => {
+    const svgString = createCorrectSVG(icon, settings);
+    const { size } = settings;
+    
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
       
-      // Navigation & Direction  
-      'ArrowLeft': 'M19 12H6 M12 5l-7 7 7 7',
-      'ArrowRight': 'M5 12h13 M12 5l7 7-7 7',
-      'ArrowUp': 'M12 19V6 M5 12l7-7 7 7',
-      'ArrowDown': 'M12 5v13 M19 12l-7 7-7-7',
-      'ChevronLeft': 'M15 18l-6-6 6-6',
-      'ChevronRight': 'M9 18l6-6-6-6',
-      'ChevronUp': 'M18 15l-6-6-6 6',
-      'ChevronDown': 'M6 9l6 6 6-6',
+      canvas.width = size * 2; // Higher resolution
+      canvas.height = size * 2;
       
-      // Time & Calendar
-      'Clock': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
-      'Calendar': 'M3 4h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M16 2v4 M8 2v4 M3 10h18',
+      img.onload = () => {
+        // Clear canvas with transparent background
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw the SVG image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      };
       
-      // Media & Files
-      'Image': 'M15 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M21 21H3V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16z M3 16l5-5c.928-.893 2.072-.893 3 0l5 5',
-      'File': 'M14 3v4a1 1 0 0 0 1 1h4 M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z',
-      'Folder': 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
+      img.onerror = () => {
+        console.log('Failed to load SVG, creating fallback PNG');
+        // Fallback: create simple shape with proper icon
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = settings.color;
+        ctx.lineWidth = settings.strokeWidth * 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Draw a simple house shape as fallback
+        ctx.beginPath();
+        ctx.moveTo(canvas.width * 0.2, canvas.height * 0.7);
+        ctx.lineTo(canvas.width * 0.5, canvas.width * 0.3);
+        ctx.lineTo(canvas.width * 0.8, canvas.height * 0.7);
+        ctx.lineTo(canvas.width * 0.8, canvas.height * 0.9);
+        ctx.lineTo(canvas.width * 0.2, canvas.height * 0.9);
+        ctx.closePath();
+        ctx.stroke();
+        
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      };
       
-      // Tools & Objects
-      'Tool': 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
-      'Wrench': 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
-      'Lock': 'M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 10 0v4',
-      'Key': 'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4',
+      // Convert SVG to data URL
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      img.src = url;
       
-      // Default fallback
-      'Circle': 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z'
+      // Clean up after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    });
+  };
+
+  const downloadIcon = async (icon, format = 'SVG') => {
+    const settings = iconSettings[icon.id] || {
+      size: 48,
+      color: icon.color,
+      strokeWidth: 2,
+      style: 'outline'
     };
     
-    return iconPaths[iconName] || iconPaths['Circle'];
-  };
-
-  const createSVG = (icon, settings) => {
-    const { size, color, strokeWidth, style } = settings;
-    const paths = getIconPaths(icon.name);
+    console.log('📥 Downloading icon:', icon.name, 'as', format);
     
-    // Split multiple path commands
-    const pathCommands = paths.split(' M').map((path, index) => 
-      index === 0 ? path : 'M' + path
-    );
-    
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      .icon-path {
-        fill: ${style === 'filled' ? color : 'none'};
-        stroke: ${color};
-        stroke-width: ${strokeWidth};
-        stroke-linecap: round;
-        stroke-linejoin: round;
+    try {
+      let content, filename, mimeType;
+      
+      if (format === 'SVG') {
+        content = createCorrectSVG(icon, settings);
+        filename = `${icon.name.toLowerCase()}-icon.svg`;
+        mimeType = 'image/svg+xml;charset=utf-8';
+        
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+      } else if (format === 'PNG') {
+        const blob = await createPNGFromSVG(icon, settings);
+        filename = `${icon.name.toLowerCase()}-icon.png`;
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
-    </style>
-  </defs>
-  ${pathCommands.map(pathData => 
-    `<path class="icon-path" d="${pathData.trim()}" />`
-  ).join('\n  ')}
-</svg>`.trim();
+      
+      console.log('✅ Downloaded successfully:', filename);
+      showDownloadNotification(icon.name, settings, format);
+      
+    } catch (error) {
+      console.error('❌ Download failed:', error);
+      showErrorNotification(`Failed to download ${icon.name} as ${format}`);
+    }
   };
 
-  const downloadIcon = async (icon) => {
-    const settings = iconSettings[icon.id] || {};
-    const svgContent = createSVG(icon, settings);
+  const showDownloadNotification = (iconName, settings, format) => {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 z-[9999] transform translate-x-full transition-transform duration-500';
+    notification.innerHTML = `
+      <div class="bg-white/95 backdrop-blur-lg rounded-[1.5rem] p-8 shadow-neumorphic border border-green-200/50 max-w-sm">
+        <div class="flex items-start space-x-6">
+          <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-teal-500 rounded-[1rem] flex items-center justify-center shadow-neumorphic-sm">
+            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-warm-800 text-xl mb-2">🎉 ${iconName} Downloaded!</h4>
+            <p class="text-warm-600 text-base">
+              Format: ${format}<br>
+              Size: ${settings.size}px<br>
+              Color: ${settings.color}<br>
+              Style: ${settings.style}
+            </p>
+          </div>
+          <button onclick="this.closest('.fixed').remove()" class="p-2 text-warm-400 hover:text-warm-600 hover:bg-warm-100 rounded-xl transition-all duration-200">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
     
-    console.log('📥 Downloading icon:', icon.name);
-    console.log('🎨 SVG Content:', svgContent);
+    document.body.appendChild(notification);
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 500);
+    }, 5000);
+  };
+
+  const showErrorNotification = (message) => {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 z-[9999] transform translate-x-full transition-transform duration-500';
+    notification.innerHTML = `
+      <div class="bg-white/95 backdrop-blur-lg rounded-[1.5rem] p-8 shadow-neumorphic border border-red-200/50 max-w-sm">
+        <div class="flex items-start space-x-6">
+          <div class="w-14 h-14 bg-gradient-to-r from-red-500 to-red-600 rounded-[1rem] flex items-center justify-center shadow-neumorphic-sm">
+            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-bold text-warm-800 text-xl mb-2">Download Error</h4>
+            <p class="text-warm-600 text-base">${message}</p>
+          </div>
+          <button onclick="this.closest('.fixed').remove()" class="p-2 text-warm-400 hover:text-warm-600 hover:bg-warm-100 rounded-xl transition-all duration-200">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
     
-    const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${icon.name.toLowerCase()}-icon.svg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    document.body.appendChild(notification);
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 500);
+    }, 4000);
   };
 
   const editInEditor = (icon) => {
@@ -534,8 +667,8 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
     if (!selectedIcons?.selectedIcons) return;
     
     for (const icon of selectedIcons.selectedIcons) {
-      await downloadIcon(icon);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await downloadIcon(icon, 'SVG');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Wait between downloads
     }
     
     onComplete?.();
@@ -565,7 +698,13 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {selectedIcons.selectedIcons.map((icon, index) => {
-          const settings = iconSettings[icon.id] || {};
+          const settings = iconSettings[icon.id] || {
+            size: 48,
+            color: icon.color,
+            strokeWidth: 2,
+            style: 'outline'
+          };
+          
           return (
             <motion.div
               key={icon.id}
@@ -579,8 +718,8 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
                   icon={icon.iconComponent}
                   className="w-12 h-12 transition-transform duration-200"
                   style={{
-                    color: settings.color || icon.color,
-                    strokeWidth: settings.strokeWidth || icon.strokeWidth || 2
+                    color: settings.color,
+                    strokeWidth: settings.strokeWidth
                   }}
                 />
               </div>
@@ -588,29 +727,43 @@ const CustomizationStep = ({ selectedIcons, onComplete }) => {
               <div className="text-center mb-6">
                 <h3 className="font-bold text-warm-800 mb-2 text-xl">{icon.name}</h3>
                 <p className="text-warm-600">
-                  {settings.size || icon.size || 48}px • {settings.color || icon.color}
+                  {settings.size}px • {settings.color} • {settings.style}
                 </p>
               </div>
               
-              <div className="flex space-x-3">
+              <div className="flex flex-col space-y-3">
+                {/* SVG Download */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => downloadIcon(icon)}
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl font-bold flex items-center justify-center space-x-2 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
+                  onClick={() => downloadIcon(icon, 'SVG')}
+                  className="py-3 px-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl font-bold flex items-center justify-center space-x-2 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
                 >
                   <SafeIcon icon={FiDownload} className="w-4 h-4" />
-                  <span>Download</span>
+                  <span>Download SVG</span>
                 </motion.button>
                 
+                {/* PNG Download */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => downloadIcon(icon, 'PNG')}
+                  className="py-3 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl font-bold flex items-center justify-center space-x-2 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
+                >
+                  <SafeIcon icon={FiDownload} className="w-4 h-4" />
+                  <span>Download PNG</span>
+                </motion.button>
+                
+                {/* Edit Button */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => editInEditor(icon)}
-                  className="px-4 py-3 bg-white text-warm-600 rounded-xl font-bold border border-warm-300 hover:bg-warm-50 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300"
+                  className="py-3 px-4 bg-white text-warm-600 rounded-xl font-bold border border-warm-300 hover:bg-warm-50 shadow-neumorphic hover:shadow-neumorphic-lg transition-all duration-300 flex items-center justify-center space-x-2"
                   title="Edit in Advanced Editor"
                 >
                   <SafeIcon icon={FiEdit3} className="w-4 h-4" />
+                  <span>Edit</span>
                 </motion.button>
               </div>
             </motion.div>

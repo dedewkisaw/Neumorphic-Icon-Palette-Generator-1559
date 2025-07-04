@@ -1,10 +1,10 @@
 import React from 'react';
-import {HashRouter as Router,Routes,Route} from 'react-router-dom';
-import {motion} from 'framer-motion';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
-import PaletteGenerator from './components/PaletteGenerator';
+import USPSection from './components/USPSection';
 import IconCreator from './components/IconCreator';
 import IconEditor from './components/IconEditor';
 import Community from './components/Community';
@@ -12,11 +12,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 import FeedbackButton from './components/FeedbackButton';
 import './App.css';
 
-// Home Page Component
+// Home Page Component - Now focused on USP and conversion
 const HomePage = () => (
   <>
     <Hero />
-    <PaletteGenerator />
+    <USPSection />
   </>
 );
 
@@ -55,10 +55,12 @@ const About = () => (
         >
           <h2 className="text-2xl font-bold text-warm-800 mb-6">Our Mission</h2>
           <p className="text-warm-700 text-lg leading-relaxed mb-6">
-            Iconify AI revolutionizes the way designers and developers create icons. Our advanced artificial intelligence analyzes your project requirements and generates perfectly matched, professional-quality icons in seconds.
+            Iconify AI revolutionizes the way designers and developers create icons. Our advanced artificial intelligence 
+            analyzes your project requirements and generates perfectly matched, professional-quality icons in seconds.
           </p>
           <p className="text-warm-600 leading-relaxed">
-            Whether you're building a mobile app, website, or brand identity, our platform ensures visual consistency and saves you countless hours of design work.
+            Whether you're building a mobile app, website, or brand identity, our platform ensures visual consistency 
+            and saves you countless hours of design work.
           </p>
         </motion.div>
 
@@ -121,7 +123,8 @@ const About = () => (
       >
         <h2 className="text-2xl font-bold text-warm-800 mb-6">Built by Passionate Creators</h2>
         <p className="text-warm-700 text-lg max-w-3xl mx-auto mb-8">
-          Our team combines expertise in artificial intelligence, user experience design, and creative technology to deliver the most intuitive neumorphic icon generation platform in the industry.
+          Our team combines expertise in artificial intelligence, user experience design, and creative technology 
+          to deliver the most intuitive neumorphic icon generation platform in the industry.
         </p>
         <div className="flex justify-center space-x-6">
           <motion.button
@@ -152,42 +155,54 @@ function App() {
           <Header />
           <main>
             <Routes>
-              <Route path="/" element={
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <HomePage />
-                </motion.div>
-              } />
-              <Route path="/creator" element={
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <IconCreator />
-                </motion.div>
-              } />
-              <Route path="/editor" element={
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <IconEditor />
-                </motion.div>
-              } />
-              <Route path="/community" element={
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <Community />
-                </motion.div>
-              } />
+              <Route 
+                path="/" 
+                element={
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ duration: 0.6 }}
+                  >
+                    <HomePage />
+                  </motion.div>
+                } 
+              />
+              <Route 
+                path="/creator" 
+                element={
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ duration: 0.6 }}
+                  >
+                    <IconCreator />
+                  </motion.div>
+                } 
+              />
+              <Route 
+                path="/editor" 
+                element={
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ duration: 0.6 }}
+                  >
+                    <IconEditor />
+                  </motion.div>
+                } 
+              />
+              <Route 
+                path="/community" 
+                element={
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Community />
+                  </motion.div>
+                } 
+              />
               <Route path="/about" element={<About />} />
             </Routes>
           </main>
